@@ -20,15 +20,18 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.sw4pspace.mc.boots.annotations.*;
-import net.sw4pspace.mc.boots.annotations.BootsPlugin;
 import net.sw4pspace.mc.boots.exception.BootsInitializationException;
 import net.sw4pspace.mc.boots.models.OnRegisterMethod;
+import net.sw4pspace.mc.boots.models.RegisteredRecipe;
 import net.sw4pspace.mc.boots.models.RegisteredScheduledTask;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.command.CommandMap;
 import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.Recipe;
+import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -56,6 +59,7 @@ public class BootsManager {
     private static ClassLoader classLoader;
 
     private static List<Plugin> registeredPlugins = Lists.newArrayList();
+    private static HashMap<RegisteredRecipe, Plugin> registeredRecipes = Maps.newHashMap();
     private static HashMap<Listener, Plugin> listeners = Maps.newHashMap();
     private static HashMap<RegisteredScheduledTask, Plugin> registeredScheduledTasks = Maps.newHashMap();
     private static HashMap<OnRegisterMethod, Plugin> onRegisterMethods = Maps.newHashMap();
@@ -84,7 +88,6 @@ public class BootsManager {
                     .filter(entry -> Objects.equals(entry.getValue(), plugin))
                     .forEach(entry -> registerListener(entry.getKey(), entry.getValue()));
         }
-
         if(registeredScheduledTasks.containsValue(plugin)) {
             registeredScheduledTasks.entrySet()
                     .stream()
@@ -97,6 +100,12 @@ public class BootsManager {
                     .filter(entry -> Objects.equals(entry.getValue(), plugin))
                     .forEach(entry -> runOnRegisterMethod(entry.getKey(), entry.getValue()));
         }
+        if(registeredRecipes.containsValue(plugin)) {
+            registeredRecipes.entrySet()
+                    .stream()
+                    .filter(entry -> Objects.equals(entry.getValue(), plugin))
+                    .forEach(entry -> registerCraftingRecipe(entry.getKey(), entry.getValue()));
+        }
         registeredPlugins.add(plugin);
     }
 
@@ -107,6 +116,13 @@ public class BootsManager {
     }
 
     // Loading methods
+
+    private static void loadCraftingRecipe(Method method, Class<?> clazz, Plugin plugin) {
+        Runnable task = clazz.equals(plugin.getClass()) ?
+                () -> plugin.getServer().addRecipe((Recipe) invokeMainClassMethod(plugin, method)) :
+                () -> plugin.getServer().addRecipe((Recipe) invokeMethod(clazz, method));
+        registeredRecipes.put(new RegisteredRecipe(clazz, method, task), plugin);
+    }
 
     private static void loadCommand(BukkitCommand command, Plugin plugin) throws NoSuchFieldException, IllegalAccessException {
         final Field bukkitCommandMap = plugin.getServer().getClass().getDeclaredField("commandMap");
@@ -134,20 +150,22 @@ public class BootsManager {
         onRegisterMethods.put(new OnRegisterMethod(clazz, method, task), plugin);
     }
 
-    private static void invokeMainClassMethod(Plugin plugin, Method method) {
+    private static Object invokeMainClassMethod(Plugin plugin, Method method) {
         try {
-            method.invoke(plugin);
+            return method.invoke(plugin);
         } catch (IllegalAccessException | InvocationTargetException e) {
             logger.severe("Error invoking method [" + method.getName() + "]: " + e.getMessage());
         }
+        return null;
     }
 
-    private static void invokeMethod(Class<?> clazz, Method method) {
+    private static Object invokeMethod(Class<?> clazz, Method method) {
         try {
-            method.invoke(clazz.newInstance());
+            return method.invoke(clazz.newInstance());
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
             logger.severe("Error invoking method [" + method.getName() + "]: " + e.getMessage());
         }
+        return null;
     }
 
     // Run/Register methods
@@ -177,6 +195,11 @@ public class BootsManager {
         } else {
             throw new BootsInitializationException(plugin);
         }
+    }
+
+    private static void registerCraftingRecipe(RegisteredRecipe registeredRecipe, Plugin plugin) {
+        registeredRecipe.getTask().run();
+        logger.info(getPluginName(plugin) + "Registered crafting recipe [" + registeredRecipe.getMethod().getName() + "] in class [" + registeredRecipe.getClazz().getName() + "]");
     }
 
     private static void runOnRegisterMethod(OnRegisterMethod onRegisterMethod, Plugin plugin) {
@@ -222,6 +245,7 @@ public class BootsManager {
                     checkListener(clazz, plugin);
                     checkScheduledTask(clazz, plugin);
                     checkOnRegister(clazz, plugin);
+                    checkCraftingRecipe(clazz, plugin);
                 } catch (IllegalAccessException | InstantiationException | NoSuchFieldException e) {
                     logger.severe("Error loading class " + clazz.getName() + " for plugin \'" + plugin.getName() + "\': " + e.getMessage());
                 } catch (NoSuchMethodException | InvocationTargetException | ClassNotFoundException e) {
@@ -296,13 +320,25 @@ public class BootsManager {
 
     private static void checkListener(Class<?> clazz, Plugin plugin) throws IllegalAccessException, ClassNotFoundException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         if (clazz.isAnnotationPresent(BootsListener.class)) {
-            if (org.bukkit.event.Listener.class.isAssignableFrom(clazz)) {
+            if (Listener.class.isAssignableFrom(clazz)) {
                 if(clazz.equals(plugin.getClass()))
                     loadListener((Listener) plugin, plugin);
                 else
                     loadListener((Listener) Class.forName(clazz.getName()).getConstructor().newInstance(), plugin);
             } else {
                 logger.severe("Class " + clazz.getName() + " has the BootsListener annotation but does not extend " + org.bukkit.event.Listener.class.getName());
+            }
+        }
+    }
+
+    private static void checkCraftingRecipe(Class<?> clazz, Plugin plugin) {
+        for(Method method : clazz.getDeclaredMethods()) {
+            if(method.isAnnotationPresent(CraftingRecipe.class)) {
+                if(method.getReturnType().isAssignableFrom(ShapedRecipe.class) || method.getReturnType().isAssignableFrom(ShapelessRecipe.class)) {
+                    loadCraftingRecipe(method, clazz, plugin);
+                } else {
+                    logger.severe("Method [" + method.getName() + "] has the CraftingRecipe annotation but doesn't return a type of " + Recipe.class.getName());
+                }
             }
         }
     }

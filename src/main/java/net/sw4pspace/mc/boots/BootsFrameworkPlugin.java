@@ -16,14 +16,15 @@
 
 package net.sw4pspace.mc.boots;
 
-import net.sw4pspace.mc.boots.annotations.BootsListener;
-import net.sw4pspace.mc.boots.annotations.BootsPlugin;
-import net.sw4pspace.mc.boots.annotations.DefaultGamemode;
-import net.sw4pspace.mc.boots.annotations.EnableWhitelist;
+import net.sw4pspace.mc.boots.annotations.*;
 import org.bukkit.GameMode;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginEnableEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.plugin.java.JavaPlugin;
 
 @BootsPlugin
@@ -63,6 +64,14 @@ public class BootsFrameworkPlugin extends JavaPlugin implements Listener {
         if(event.getPlugin().getDescription().getDepend().contains("Boots")) {
             BootsManager.register(event.getPlugin());
         }
+    }
+
+    @CraftingRecipe
+    public ShapedRecipe getTestRecipe() {
+        ShapedRecipe shapedRecipe = new ShapedRecipe(new NamespacedKey("boots", "test-recipe"), new ItemStack(Material.CHEST));
+        shapedRecipe.shape("XXX", "OXO", "OXO");
+        shapedRecipe.setIngredient('X', Material.DIRT);
+        return shapedRecipe;
     }
 
 }
