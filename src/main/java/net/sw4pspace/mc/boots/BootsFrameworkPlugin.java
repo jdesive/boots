@@ -34,7 +34,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class BootsFrameworkPlugin extends JavaPlugin implements Listener {
 
     /*
-    - Recipes
     - BossBars
     - Advancements
     - Inventory

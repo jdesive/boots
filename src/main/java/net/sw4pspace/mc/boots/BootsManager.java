@@ -22,6 +22,7 @@ import com.google.common.collect.Maps;
 import net.sw4pspace.mc.boots.annotations.*;
 import net.sw4pspace.mc.boots.exception.BootsInitializationException;
 import net.sw4pspace.mc.boots.models.OnRegisterMethod;
+import net.sw4pspace.mc.boots.models.RegisteredAdvancement;
 import net.sw4pspace.mc.boots.models.RegisteredRecipe;
 import net.sw4pspace.mc.boots.models.RegisteredScheduledTask;
 import org.bukkit.Bukkit;
@@ -60,6 +61,7 @@ public class BootsManager {
 
     private static List<Plugin> registeredPlugins = Lists.newArrayList();
     private static HashMap<RegisteredRecipe, Plugin> registeredRecipes = Maps.newHashMap();
+    private static HashMap<RegisteredAdvancement, Plugin> registeredAdvancements = Maps.newHashMap();
     private static HashMap<Listener, Plugin> listeners = Maps.newHashMap();
     private static HashMap<RegisteredScheduledTask, Plugin> registeredScheduledTasks = Maps.newHashMap();
     private static HashMap<OnRegisterMethod, Plugin> onRegisterMethods = Maps.newHashMap();
@@ -106,6 +108,14 @@ public class BootsManager {
                     .filter(entry -> Objects.equals(entry.getValue(), plugin))
                     .forEach(entry -> registerCraftingRecipe(entry.getKey(), entry.getValue()));
         }
+        // TODO Expand out to an Advancement API, lets aim at making it easier to write out advancements.
+        // This could be done with a builder pattern and some ENUM's.
+        /*if(registeredAdvancements.containsValue(plugin)) {
+            registeredAdvancements.entrySet()
+                    .stream()
+                    .filter(entry -> Objects.equals(entry.getValue(), plugin))
+                    .forEach(entry -> );
+        }*/
         registeredPlugins.add(plugin);
     }
 
@@ -148,6 +158,13 @@ public class BootsManager {
                 () -> invokeMainClassMethod(plugin, method) :
                 () -> invokeMethod(clazz, method);
         onRegisterMethods.put(new OnRegisterMethod(clazz, method, task), plugin);
+    }
+
+    private static void loadAdvancement(Method method, Class<?> clazz, Plugin plugin) {
+        org.bukkit.advancement.Advancement advancement = (org.bukkit.advancement.Advancement) (clazz.equals(plugin.getClass()) ?
+                        invokeMainClassMethod(plugin, method) :
+                        invokeMethod(clazz, method));
+        registeredAdvancements.put(new RegisteredAdvancement(method, clazz, advancement), plugin);
     }
 
     private static Object invokeMainClassMethod(Plugin plugin, Method method) {
@@ -246,6 +263,7 @@ public class BootsManager {
                     checkScheduledTask(clazz, plugin);
                     checkOnRegister(clazz, plugin);
                     checkCraftingRecipe(clazz, plugin);
+                    checkAdvancement(clazz, plugin);
                 } catch (IllegalAccessException | InstantiationException | NoSuchFieldException e) {
                     logger.severe("Error loading class " + clazz.getName() + " for plugin \'" + plugin.getName() + "\': " + e.getMessage());
                 } catch (NoSuchMethodException | InvocationTargetException | ClassNotFoundException e) {
@@ -338,6 +356,18 @@ public class BootsManager {
                     loadCraftingRecipe(method, clazz, plugin);
                 } else {
                     logger.severe("Method [" + method.getName() + "] has the CraftingRecipe annotation but doesn't return a type of " + Recipe.class.getName());
+                }
+            }
+        }
+    }
+
+    private static void checkAdvancement(Class<?> clazz, Plugin plugin) {
+        for(Method method : clazz.getDeclaredMethods()) {
+            if(method.isAnnotationPresent(Advancement.class)) {
+                if(method.getReturnType().isAssignableFrom(org.bukkit.advancement.Advancement.class)) {
+                    loadAdvancement(method, clazz, plugin);
+                } else {
+                    logger.severe("Method [" + method.getName() + "] has the Advancement annotation but doesn't return a type of " + org.bukkit.advancement.Advancement.class.getName());
                 }
             }
         }
