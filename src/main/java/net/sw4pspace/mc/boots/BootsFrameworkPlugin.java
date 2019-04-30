@@ -17,12 +17,14 @@
 package net.sw4pspace.mc.boots;
 
 import net.sw4pspace.mc.boots.annotations.*;
+import net.sw4pspace.mc.boots.builder.InventoryBuilder;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginEnableEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -36,7 +38,6 @@ public class BootsFrameworkPlugin extends JavaPlugin implements Listener {
     /*
     - BossBars
     - Advancements
-    - Inventory
     - Scoreboard
     - MOTD, PlayerCount, etc (These are plugin level annotations that must be specified in the main class)
      */
@@ -60,7 +61,7 @@ public class BootsFrameworkPlugin extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onPluginEnable(PluginEnableEvent event) {
-        if(event.getPlugin().getDescription().getDepend().contains("Boots")) {
+        if (event.getPlugin().getDescription().getDepend().contains("Boots")) {
             BootsManager.register(event.getPlugin());
         }
     }
@@ -71,6 +72,13 @@ public class BootsFrameworkPlugin extends JavaPlugin implements Listener {
         shapedRecipe.shape("XXX", "OXO", "OXO");
         shapedRecipe.setIngredient('X', Material.DIRT);
         return shapedRecipe;
+    }
+
+    @BootsInventory("boots:testinv")
+    public Inventory getTestInv() {
+        return new InventoryBuilder("Boots Test Inventory")
+                .addItems(new ItemStack(Material.CHEST))
+                .craft();
     }
 
 }

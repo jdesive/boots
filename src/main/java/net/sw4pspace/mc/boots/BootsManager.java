@@ -21,10 +21,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.sw4pspace.mc.boots.annotations.*;
 import net.sw4pspace.mc.boots.exception.BootsInitializationException;
-import net.sw4pspace.mc.boots.models.OnRegisterMethod;
-import net.sw4pspace.mc.boots.models.RegisteredAdvancement;
-import net.sw4pspace.mc.boots.models.RegisteredRecipe;
-import net.sw4pspace.mc.boots.models.RegisteredScheduledTask;
+import net.sw4pspace.mc.boots.models.*;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.command.CommandMap;
@@ -62,6 +59,7 @@ public class BootsManager {
     private static List<Plugin> registeredPlugins = Lists.newArrayList();
     private static HashMap<RegisteredRecipe, Plugin> registeredRecipes = Maps.newHashMap();
     private static HashMap<RegisteredAdvancement, Plugin> registeredAdvancements = Maps.newHashMap();
+    private static HashMap<RegisteredInventory, Plugin> registeredInventories = Maps.newHashMap();
     private static HashMap<Listener, Plugin> listeners = Maps.newHashMap();
     private static HashMap<RegisteredScheduledTask, Plugin> registeredScheduledTasks = Maps.newHashMap();
     private static HashMap<OnRegisterMethod, Plugin> onRegisterMethods = Maps.newHashMap();
@@ -108,6 +106,12 @@ public class BootsManager {
                     .filter(entry -> Objects.equals(entry.getValue(), plugin))
                     .forEach(entry -> registerCraftingRecipe(entry.getKey(), entry.getValue()));
         }
+        if(registeredInventories.containsValue(plugin)) {
+            registeredInventories.entrySet()
+                    .stream()
+                    .filter(entry -> Objects.equals(entry.getValue(), plugin))
+                    .forEach(entry -> registerInventory(entry.getKey(), entry.getValue()));
+        }
         // TODO Expand out to an Advancement API, lets aim at making it easier to write out advancements.
         // This could be done with a builder pattern and some ENUM's.
         /*if(registeredAdvancements.containsValue(plugin)) {
@@ -126,6 +130,13 @@ public class BootsManager {
     }
 
     // Loading methods
+
+    private static void loadInventory(BootsInventory bootsInventory, Method method, Class<?> clazz, Plugin plugin) {
+        org.bukkit.inventory.Inventory inv = (org.bukkit.inventory.Inventory) (clazz.equals(plugin.getClass()) ?
+                        invokeMainClassMethod(plugin, method) :
+                        invokeMethod(clazz, method));
+        registeredInventories.put(new RegisteredInventory(clazz, bootsInventory.value(), inv), plugin);
+    }
 
     private static void loadCraftingRecipe(Method method, Class<?> clazz, Plugin plugin) {
         Runnable task = clazz.equals(plugin.getClass()) ?
@@ -214,6 +225,11 @@ public class BootsManager {
         }
     }
 
+    private static void registerInventory(RegisteredInventory registeredInventory, Plugin plugin) {
+        Boots.getInventoryManager().registerInventory(registeredInventory);
+        logger.info(getPluginName(plugin) + "Registered inventory [" + registeredInventory.getKey().toString() + "] in class [" + registeredInventory.getClazz().getName());
+    }
+
     private static void registerCraftingRecipe(RegisteredRecipe registeredRecipe, Plugin plugin) {
         registeredRecipe.getTask().run();
         logger.info(getPluginName(plugin) + "Registered crafting recipe [" + registeredRecipe.getMethod().getName() + "] in class [" + registeredRecipe.getClazz().getName() + "]");
@@ -264,6 +280,7 @@ public class BootsManager {
                     checkOnRegister(clazz, plugin);
                     checkCraftingRecipe(clazz, plugin);
                     checkAdvancement(clazz, plugin);
+                    checkInventory(clazz, plugin);
                 } catch (IllegalAccessException | InstantiationException | NoSuchFieldException e) {
                     logger.severe("Error loading class " + clazz.getName() + " for plugin \'" + plugin.getName() + "\': " + e.getMessage());
                 } catch (NoSuchMethodException | InvocationTargetException | ClassNotFoundException e) {
@@ -368,6 +385,18 @@ public class BootsManager {
                     loadAdvancement(method, clazz, plugin);
                 } else {
                     logger.severe("Method [" + method.getName() + "] has the Advancement annotation but doesn't return a type of " + org.bukkit.advancement.Advancement.class.getName());
+                }
+            }
+        }
+    }
+
+    private static void checkInventory(Class<?> clazz, Plugin plugin) {
+        for(Method method : clazz.getDeclaredMethods()) {
+            if(method.isAnnotationPresent(BootsInventory.class)) {
+                if (method.getReturnType().isAssignableFrom(org.bukkit.inventory.Inventory.class)) {
+                    loadInventory(method.getAnnotation(BootsInventory.class), method, clazz, plugin);
+                } else {
+                    logger.severe("Method [" + method.getName() + "] has the BootsInventory annotation but doesn't return a type of " + org.bukkit.inventory.Inventory.class.getName());
                 }
             }
         }
