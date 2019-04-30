@@ -14,20 +14,17 @@
  * copies or substantial portions of the Software.
  */
 
-package net.sw4pspace.mc.boots.models;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import org.bukkit.inventory.Recipe;
+package net.sw4pspace.mc.boots.exception;
 
 import java.lang.reflect.Method;
 
-@Getter
-@Setter
-@AllArgsConstructor
-public class RegisteredRecipe {
-    private Class<?> clazz;
-    private Method method;
-    private Recipe recipe;
+public class BootsRegistrationException extends RuntimeException {
+
+    public BootsRegistrationException(Method method, Class<?> annotation, Class<?> clazz) {
+        super("Method [" + method.getName() + "] has the " + annotation.getClass().getName() + " annotation but does not return a type of " + clazz.getName());
+    }
+
+    public BootsRegistrationException(Class<?> scanClazz, Class<?> annotation, Class<?> clazz) {
+        super("Class [" + scanClazz.getName() + "] has the " + annotation.getClass().getName() + " but does not extend a type of " + clazz.getName());
+    }
 }

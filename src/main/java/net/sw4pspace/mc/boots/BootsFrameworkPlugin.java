@@ -18,6 +18,7 @@ package net.sw4pspace.mc.boots;
 
 import net.sw4pspace.mc.boots.annotations.*;
 import net.sw4pspace.mc.boots.builder.InventoryBuilder;
+import net.sw4pspace.mc.boots.init.ListenerInitializer;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -68,10 +69,9 @@ public class BootsFrameworkPlugin extends JavaPlugin implements Listener {
 
     @CraftingRecipe
     public ShapedRecipe getTestRecipe() {
-        ShapedRecipe shapedRecipe = new ShapedRecipe(new NamespacedKey("boots", "test-recipe"), new ItemStack(Material.CHEST));
-        shapedRecipe.shape("XXX", "OXO", "OXO");
-        shapedRecipe.setIngredient('X', Material.DIRT);
-        return shapedRecipe;
+        return new ShapedRecipe(new NamespacedKey("boots", "test-recipe"), new ItemStack(Material.CHEST))
+                .shape("XXX", "OXO", "OXO")
+                .setIngredient('X', Material.DIRT);
     }
 
     @BootsInventory("boots:testinv")

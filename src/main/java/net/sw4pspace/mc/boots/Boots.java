@@ -18,6 +18,9 @@ package net.sw4pspace.mc.boots;
 
 import lombok.Getter;
 import net.sw4pspace.mc.boots.manager.InventoryManager;
+import org.bukkit.Bukkit;
+
+import java.util.logging.Logger;
 
 /**
  * Boots API
@@ -28,6 +31,9 @@ import net.sw4pspace.mc.boots.manager.InventoryManager;
  * @since 1.0
  */
 public class Boots {
+
+    @Getter
+    private static final Logger bootsLogger = Bukkit.getPluginManager().getPlugin("Boots").getLogger();
 
     // Managers
     @Getter private static InventoryManager inventoryManager;

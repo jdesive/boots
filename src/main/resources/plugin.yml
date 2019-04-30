@@ -1,4 +1,5 @@
 name: Boots
 description: Spigot Bootstrap for annotaion based plugin development
-version: 1.0.0
+version: 0.0.1
 main: net.sw4pspace.mc.boots.BootsFrameworkPlugin
+api-version: 1.14

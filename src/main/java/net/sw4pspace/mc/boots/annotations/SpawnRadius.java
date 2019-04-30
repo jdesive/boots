@@ -14,7 +14,7 @@
  * copies or substantial portions of the Software.
  */
 
-package net.sw4pspace.mc.boots;
+package net.sw4pspace.mc.boots.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

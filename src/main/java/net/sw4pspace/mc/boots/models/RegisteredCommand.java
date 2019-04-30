@@ -19,15 +19,12 @@ package net.sw4pspace.mc.boots.models;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import org.bukkit.inventory.Recipe;
-
-import java.lang.reflect.Method;
+import org.bukkit.command.defaults.BukkitCommand;
 
 @Getter
 @Setter
 @AllArgsConstructor
-public class RegisteredRecipe {
+public class RegisteredCommand {
     private Class<?> clazz;
-    private Method method;
-    private Recipe recipe;
+    private BukkitCommand command;
 }
