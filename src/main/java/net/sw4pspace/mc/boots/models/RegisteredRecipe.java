@@ -16,29 +16,17 @@
 
 package net.sw4pspace.mc.boots.models;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.lang.reflect.Method;
 
+@Getter
+@Setter
+@AllArgsConstructor
 public class RegisteredRecipe {
-
     private Class<?> clazz;
     private Method method;
     private Runnable task;
-
-    public RegisteredRecipe(Class<?> clazz, Method method, Runnable task) {
-        this.clazz = clazz;
-        this.method = method;
-        this.task = task;
-    }
-
-    public Class<?> getClazz() {
-        return clazz;
-    }
-
-    public Method getMethod() {
-        return method;
-    }
-
-    public Runnable getTask() {
-        return task;
-    }
 }

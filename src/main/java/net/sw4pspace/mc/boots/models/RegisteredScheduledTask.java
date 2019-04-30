@@ -16,23 +16,15 @@
 
 package net.sw4pspace.mc.boots.models;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import net.sw4pspace.mc.boots.annotations.BootsScheduledTask;
 
+@Getter
+@Setter
+@AllArgsConstructor
 public class RegisteredScheduledTask {
-
     private BootsScheduledTask bootsScheduledTask;
     private Runnable task;
-
-    public RegisteredScheduledTask(BootsScheduledTask bootsScheduledTask, Runnable task) {
-        this.bootsScheduledTask = bootsScheduledTask;
-        this.task = task;
-    }
-
-    public BootsScheduledTask getBootsScheduledTask() {
-        return bootsScheduledTask;
-    }
-
-    public Runnable getTask() {
-        return task;
-    }
 }

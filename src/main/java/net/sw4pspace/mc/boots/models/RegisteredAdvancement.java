@@ -16,31 +16,18 @@
 
 package net.sw4pspace.mc.boots.models;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.advancement.Advancement;
 
 import java.lang.reflect.Method;
 
+@Getter
+@Setter
+@AllArgsConstructor
 public class RegisteredAdvancement {
-
     private Method method;
     private Class<?> clazz;
     private Advancement advancement;
-
-    public RegisteredAdvancement(Method method, Class<?> clazz, Advancement advancement) {
-        this.method = method;
-        this.clazz = clazz;
-        this.advancement = advancement;
-    }
-
-    public Method getMethod() {
-        return method;
-    }
-
-    public Class<?> getClazz() {
-        return clazz;
-    }
-
-    public Advancement getAdvancement() {
-        return advancement;
-    }
 }
