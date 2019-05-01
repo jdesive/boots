@@ -17,6 +17,7 @@
 package net.sw4pspace.mc.boots;
 
 import lombok.Getter;
+import net.sw4pspace.mc.boots.manager.BossBarManager;
 import net.sw4pspace.mc.boots.manager.InventoryManager;
 import org.bukkit.Bukkit;
 
@@ -37,9 +38,11 @@ public class Boots {
 
     // Managers
     @Getter private static InventoryManager inventoryManager;
+    @Getter private static BossBarManager bossBarManager;
 
     static {
         inventoryManager = new InventoryManager();
+        bossBarManager = new BossBarManager();
     }
 
 

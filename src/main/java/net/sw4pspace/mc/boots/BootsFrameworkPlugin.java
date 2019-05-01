@@ -18,10 +18,13 @@ package net.sw4pspace.mc.boots;
 
 import net.sw4pspace.mc.boots.annotations.*;
 import net.sw4pspace.mc.boots.builder.InventoryBuilder;
-import net.sw4pspace.mc.boots.init.ListenerInitializer;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.boss.BarColor;
+import org.bukkit.boss.BarStyle;
+import org.bukkit.boss.BossBar;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginEnableEvent;
@@ -37,7 +40,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class BootsFrameworkPlugin extends JavaPlugin implements Listener {
 
     /*
-    - BossBars
     - Advancements
     - Scoreboard
     - MOTD, PlayerCount, etc (These are plugin level annotations that must be specified in the main class)
@@ -79,6 +81,11 @@ public class BootsFrameworkPlugin extends JavaPlugin implements Listener {
         return new InventoryBuilder("Boots Test Inventory")
                 .addItems(new ItemStack(Material.CHEST))
                 .craft();
+    }
+
+    @BootsBossBar("boots:testbar")
+    public BossBar getTestBossBar() {
+        return Bukkit.createBossBar("Test Bar", BarColor.BLUE,  BarStyle.SOLID);
     }
 
 }

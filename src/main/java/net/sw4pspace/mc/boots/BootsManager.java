@@ -59,6 +59,7 @@ public class BootsManager {
     @Getter private static HashMap<RegisteredScheduledTask, Plugin> registeredScheduledTasks = Maps.newHashMap();
     @Getter private static HashMap<OnRegisterMethod, Plugin> onRegisterMethods = Maps.newHashMap();
     @Getter private static HashMap<RegisteredCommand, Plugin> registeredCommands = Maps.newHashMap();
+    @Getter private static HashMap<RegisteredBossBar, Plugin> registeredBossBars = Maps.newHashMap();
 
     // Initializers
     private static ListenerInitializer listenerInitializer = new ListenerInitializer();
@@ -68,6 +69,7 @@ public class BootsManager {
     private static OnRegisterInitializer onRegisterInitializer = new OnRegisterInitializer();
     private static CommandInitializer commandInitializer = new CommandInitializer();
     private static AdvancementInitializer advancementInitializer = new AdvancementInitializer();
+    private static BossBarInitializer bossBarInitializer = new BossBarInitializer();
 
     @Getter
     private static List<Initializer<?>> initializers = Lists.newArrayList(
@@ -76,7 +78,8 @@ public class BootsManager {
             recipeInitializer,
             scheduledTaskInitializer,
             onRegisterInitializer,
-            commandInitializer
+            commandInitializer,
+            bossBarInitializer
     );
 
     BootsManager(JavaPlugin plugin, ClassLoader cl) {
@@ -104,6 +107,7 @@ public class BootsManager {
         runInitializer(registeredInventories, plugin, inventoryInitializer);
         runInitializer(registeredCommands, plugin, commandInitializer);
         runInitializer(registeredAdvancements, plugin, advancementInitializer);
+        runInitializer(registeredBossBars, plugin, bossBarInitializer);
         registeredPlugins.add(plugin);
     }
 
