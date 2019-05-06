@@ -16,11 +16,14 @@
 
 package net.sw4pspace.mc.boots;
 
+import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.AtomicDouble;
 import lombok.Getter;
 import net.sw4pspace.mc.boots.manager.BossBarManager;
 import net.sw4pspace.mc.boots.manager.InventoryManager;
 import org.bukkit.Bukkit;
 
+import java.util.LinkedList;
 import java.util.logging.Logger;
 
 /**
@@ -33,17 +36,22 @@ import java.util.logging.Logger;
  */
 public class Boots {
 
-    @Getter
-    private static final Logger bootsLogger = Bukkit.getPluginManager().getPlugin("Boots").getLogger();
+    @Getter private static Logger bootsLogger = Bukkit.getPluginManager().getPlugin("Boots").getLogger();
 
     // Managers
     @Getter private static InventoryManager inventoryManager;
     @Getter private static BossBarManager bossBarManager;
+
+    // Sever Statistics
+    private static AtomicDouble currentTps = new AtomicDouble(20.0D); // Lombok on this seems to throw errors, should probably make a issue over at lombok github
+    @Getter private static LinkedList<Double> tpsHistory = Lists.newLinkedList();
 
     static {
         inventoryManager = new InventoryManager();
         bossBarManager = new BossBarManager();
     }
 
-
+    public static AtomicDouble getCurrentTps() {
+        return currentTps;
+    }
 }

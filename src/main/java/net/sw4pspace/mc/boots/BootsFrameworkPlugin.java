@@ -19,7 +19,6 @@ package net.sw4pspace.mc.boots;
 import net.sw4pspace.mc.boots.annotations.*;
 import net.sw4pspace.mc.boots.builder.InventoryBuilder;
 import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.boss.BarColor;
@@ -35,14 +34,17 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 @BootsPlugin
 @BootsListener
-@EnableWhitelist
-@DefaultGamemode(GameMode.CREATIVE)
 public class BootsFrameworkPlugin extends JavaPlugin implements Listener {
 
     /*
     - Advancements
     - Scoreboard
     - MOTD, PlayerCount, etc (These are plugin level annotations that must be specified in the main class)
+    - Database manager
+    - HTTP utility
+    - Inventory pagination
+    - TPS Util
+    -
      */
 
     @Override

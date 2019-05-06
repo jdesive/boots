@@ -14,7 +14,13 @@
   ~ The above copyright notice and this permission notice shall be included in all
   ~ copies or substantial portions of the Software.
   -->
+<!--
 
+ !!!WARNING!!! We have deprecated this. Please use gradle instead. See build.gradle
+
+ Keeping it around for Maven support in case ever need but hopefully never needed
+
+ -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -55,6 +61,13 @@
                 <configuration>
                     <source>8</source>
                     <target>8</target>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>1.18.6</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
         </plugins>

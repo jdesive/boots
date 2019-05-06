@@ -2,3 +2,7 @@
 /.idea/
 /boots.iml
 /target/
+/boots.ipr
+/boots.iws
+/build/
+/.gradle/
