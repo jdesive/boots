@@ -1,30 +1,36 @@
+/*#
+# MIT License
+#
+# Copyright (c) 2019 Sw4pSpace
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#*/
+
 plugins {
     id "java"
 }
 
 group = 'net.sw4pspace.mc'
-version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '1.8'
+version = bootsVersion
+sourceCompatibility = '1.8' // TODO upgrade to 1.11
 
 repositories {
     mavenCentral()
-    jcenter()
-    maven {
-        url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
-    }
+    maven { url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
     maven { url = 'https://oss.sonatype.org/content/repositories/snapshots' }
 }
 
-jar {
-    baseName = 'boots'
-    version =  '0.1.0'
-}
-
 dependencies {
-    implementation 'org.spigotmc:spigot-api:1.14-R0.1-SNAPSHOT'
+    implementation "org.spigotmc:spigot-api:${spigotApiVerison}"
 
-    // https://projectlombok.org
-    compileOnly 'org.projectlombok:lombok:1.18.4'
-    annotationProcessor 'org.projectlombok:lombok:1.18.4'
-
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 }
