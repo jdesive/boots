@@ -16,9 +16,14 @@
 
 plugins {
     id "java"
+    id 'maven'
 }
 
-group = 'net.sw4pspace.mc'
+configurations {
+    deployerJars
+}
+
+group = bootsGroup
 version = bootsVersion
 sourceCompatibility = '1.8' // TODO upgrade to 1.11
 
@@ -33,4 +38,29 @@ dependencies {
 
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+    deployerJars "org.apache.maven.wagon:wagon-http:2.2"
+}
+
+uploadArchives {
+    repositories.mavenDeployer {
+        repository(url: 'https://nexus.sw4pspace.net/nexus/content/repositories/releases/') {
+            authentication(userName: "$System.env.NEXUS_USER", password: "$System.env.NEXUS_PASS")
+        }
+        snapshotRepository(url: 'https://nexus.sw4pspace.net/nexus/content/repositories/snapshots/') {
+            authentication(userName: "$System.env.NEXUS_USER", password: "$System.env.NEXUS_PASS")
+        }
+        pom.version = bootsVersion
+        pom.artifactId = bootsName
+        pom.groupId = bootsGroup
+        pom.project {
+            licenses {
+                license {
+                    name 'MIT License'
+                    url 'https://en.wikipedia.org/wiki/MIT_License'
+                    distribution 'repo'
+                }
+            }
+        }
+    }
 }
