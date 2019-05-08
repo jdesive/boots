@@ -18,12 +18,16 @@ package net.sw4pspace.mc.boots;
 
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.AtomicDouble;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import lombok.Getter;
 import net.sw4pspace.mc.boots.manager.BossBarManager;
 import net.sw4pspace.mc.boots.manager.InventoryManager;
 import org.bukkit.Bukkit;
 
 import java.util.LinkedList;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
 /**
@@ -44,7 +48,11 @@ public class Boots {
 
     // Sever Statistics
     private static AtomicDouble currentTps = new AtomicDouble(20.0D); // Lombok on this seems to throw errors, should probably make a issue over at lombok github
+    @Getter private static final AtomicLong currSec = new AtomicLong(0L);
+    @Getter private static final AtomicInteger ticks = new AtomicInteger(0);
     @Getter private static LinkedList<Double> tpsHistory = Lists.newLinkedList();
+
+    @Getter private Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     static {
         inventoryManager = new InventoryManager();

@@ -17,36 +17,20 @@
 package net.sw4pspace.mc.boots;
 
 import net.sw4pspace.mc.boots.annotations.BootsScheduledTask;
-import org.bukkit.Bukkit;
 
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-
-import static net.sw4pspace.mc.boots.Boots.getCurrentTps;
+import static net.sw4pspace.mc.boots.Boots.*;
 
 public class BootsTasks {
 
     @BootsScheduledTask(name = "boots:tps-monitor", interval = 1L)
-    public Runnable tpsMonitor() {
-        final AtomicLong currSec = new AtomicLong(0L);
-        final AtomicInteger ticks = new AtomicInteger(0);
-        return () -> {
-            long calcSec = (System.currentTimeMillis() / 1000L);
-            if (currSec.get() == calcSec) {
-                ticks.incrementAndGet();
-                return;
-            }
-            currSec.set(calcSec);
-            getCurrentTps().set(getCurrentTps().get() == 0 ? ticks.get() : ((getCurrentTps().get() + ticks.get()) / 2));
-            ticks.set(0);
-        };
-    }
-
-    @BootsScheduledTask(name = "boots:tps-broadcast", interval = 20L, async = true)
-    public Runnable tpsBroadcast() {
-        return () -> {
-            Bukkit.broadcastMessage("TPS: " + getCurrentTps().get());
-        };
+    public void tpsMonitor() {
+        long calcSec = (System.currentTimeMillis() / 1000L);
+        getTicks().incrementAndGet();
+        if (getCurrSec().get() < calcSec) {
+            getCurrSec().set(calcSec);
+            getCurrentTps().set(getTicks().get());
+            getTicks().set(0);
+        }
     }
 
 }
