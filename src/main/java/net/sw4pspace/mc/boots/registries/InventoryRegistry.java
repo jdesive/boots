@@ -14,33 +14,25 @@
  * copies or substantial portions of the Software.
  */
 
-package net.sw4pspace.mc.boots.manager;
+package net.sw4pspace.mc.boots.registries;
 
 import com.google.common.collect.Maps;
-import net.sw4pspace.mc.boots.models.RegisteredBossBar;
-import org.bukkit.boss.BossBar;
+import net.sw4pspace.mc.boots.models.RegisteredInventory;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 
 import java.util.HashMap;
 
-public class BossBarManager {
+public class InventoryRegistry {
 
-    private HashMap<String, BossBar> bossBarList = Maps.newHashMap();
+    private HashMap<String, Inventory> inventoryList = Maps.newHashMap();
 
-    public void registerBossBar(RegisteredBossBar registeredBossBar) {
-        bossBarList.put(registeredBossBar.getId(), registeredBossBar.getBossBar());
+    public void registerInventory(RegisteredInventory registeredInventory) {
+        inventoryList.put(registeredInventory.getKey(), registeredInventory.getInventory());
     }
 
-    public void addPlayer(Player player, String id) {
-        bossBarList.get(id).addPlayer(player);
-    }
-
-    public void removePlayer(Player player, String id) {
-        bossBarList.get(id).removePlayer(player);
-    }
-
-    public void setVisible(String id, boolean value) {
-        bossBarList.get(id).setVisible(value);
+    public void openInventory(Player player, String key) {
+        player.openInventory(inventoryList.get(key));
     }
 
 }

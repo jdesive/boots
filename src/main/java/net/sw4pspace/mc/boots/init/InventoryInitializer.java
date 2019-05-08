@@ -19,10 +19,8 @@ package net.sw4pspace.mc.boots.init;
 import net.sw4pspace.mc.boots.Boots;
 import net.sw4pspace.mc.boots.BootsManager;
 import net.sw4pspace.mc.boots.annotations.BootsInventory;
-import net.sw4pspace.mc.boots.annotations.BootsListener;
 import net.sw4pspace.mc.boots.exception.BootsRegistrationException;
 import net.sw4pspace.mc.boots.models.RegisteredInventory;
-import org.bukkit.event.Listener;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
 
@@ -45,7 +43,7 @@ public class InventoryInitializer implements Initializer<RegisteredInventory>{
 
     @Override
     public void register(RegisteredInventory registeredInventory, Plugin plugin) {
-        Boots.getInventoryManager().registerInventory(registeredInventory);
+        Boots.getInventoryRegistry().registerInventory(registeredInventory);
         Boots.getBootsLogger().info(getPluginName(plugin) + "Registered inventory [" + registeredInventory.getKey() + "] in class [" + registeredInventory.getClazz().getName());
     }
 

@@ -42,7 +42,7 @@ public class BossBarInitializer implements Initializer<RegisteredBossBar>{
 
     @Override
     public void register(RegisteredBossBar registeredBossBar, Plugin plugin) {
-        Boots.getBossBarManager().registerBossBar(registeredBossBar);
+        Boots.getBossBarRegistry().registerBossBar(registeredBossBar);
         Boots.getBootsLogger().info(getPluginName(plugin) + "Registered boss bar [" + registeredBossBar.getId() + "] from class " + registeredBossBar.getClazz().getName());
     }
 

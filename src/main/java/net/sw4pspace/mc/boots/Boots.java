@@ -21,8 +21,8 @@ import com.google.common.util.concurrent.AtomicDouble;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import lombok.Getter;
-import net.sw4pspace.mc.boots.manager.BossBarManager;
-import net.sw4pspace.mc.boots.manager.InventoryManager;
+import net.sw4pspace.mc.boots.registries.BossBarRegistry;
+import net.sw4pspace.mc.boots.registries.InventoryRegistry;
 import net.sw4pspace.mc.boots.models.RegionSelection;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -45,8 +45,8 @@ public class Boots {
     @Getter private static Logger bootsLogger = Bukkit.getPluginManager().getPlugin("Boots").getLogger();
 
     // Managers
-    @Getter private static InventoryManager inventoryManager;
-    @Getter private static BossBarManager bossBarManager;
+    @Getter private static InventoryRegistry inventoryRegistry;
+    @Getter private static BossBarRegistry bossBarRegistry;
 
     // Sever Statistics
     private static AtomicDouble currentTps = new AtomicDouble(20.0D); // Lombok on this seems to throw errors, should probably make a issue over at lombok github
@@ -57,8 +57,8 @@ public class Boots {
     @Getter private Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     static {
-        inventoryManager = new InventoryManager();
-        bossBarManager = new BossBarManager();
+        inventoryRegistry = new InventoryRegistry();
+        bossBarRegistry = new BossBarRegistry();
     }
 
     public static AtomicDouble getCurrentTps() {
