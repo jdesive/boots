@@ -6,9 +6,23 @@ The goal with Boots is to simplify your plugin development lifecycle, we hope to
 providing the most simplistic, stable, and powerful plugin framework available. 
 
 ## Features
-* Command register with @BootsCommand
-* Listener register with @BootsListener
-* Task scheduling with @BootsScheduledTask
+### Annotations
+* [@BootsCommand](/docs/BootsCommand.md)
+* @BootsListener
+* @BootsScheduledTask
+* @BootsInventory
+* @BootsBossBar
+* @BootsCraftingRecipe
+* @DefaultGamemode
+* @EnableWhitelist
+* @IdleTimeout
+* @SpawnRadius
+* @OnRegister
+### Utilities
+* Inventory Registry
+* Boss Bar Registry
+* TPS Monitor
+* Inventory Builder
 
 ## Project Setup
 Maven 
