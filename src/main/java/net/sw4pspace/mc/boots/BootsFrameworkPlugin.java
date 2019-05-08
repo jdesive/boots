@@ -16,29 +16,12 @@
 
 package net.sw4pspace.mc.boots;
 
-import net.sw4pspace.mc.boots.annotations.*;
-import net.sw4pspace.mc.boots.builder.InventoryBuilder;
-import net.sw4pspace.mc.boots.models.RegionSelection;
-import net.sw4pspace.mc.boots.models.WorldRegion;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.block.BlockState;
-import org.bukkit.boss.BarColor;
-import org.bukkit.boss.BarStyle;
-import org.bukkit.boss.BossBar;
+import net.sw4pspace.mc.boots.annotations.BootsListener;
+import net.sw4pspace.mc.boots.annotations.BootsPlugin;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginEnableEvent;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.util.stream.StreamSupport;
-
-import static net.sw4pspace.mc.boots.Boots.selectRegion;
 
 @BootsPlugin
 @BootsListener
@@ -64,12 +47,6 @@ public class BootsFrameworkPlugin extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         BootsManager.register(this);
-        RegionSelection regionSelection = selectRegion(new Location(Bukkit.getWorld("world"), 0, 50, 0), new Location(Bukkit.getWorld("world"), 10, 60, 10));
-        regionSelection.getRegion().forEach(block -> {
-            BlockState state = block.getState();
-            state.setType(Material.GOLD_BLOCK);
-            state.update(true);
-        });
         super.onEnable();
     }
 
@@ -84,24 +61,4 @@ public class BootsFrameworkPlugin extends JavaPlugin implements Listener {
             BootsManager.register(event.getPlugin());
         }
     }
-
-    @CraftingRecipe
-    public ShapedRecipe getTestRecipe() {
-        return new ShapedRecipe(new NamespacedKey("boots", "test-recipe"), new ItemStack(Material.CHEST))
-                .shape("XXX", "OXO", "OXO")
-                .setIngredient('X', Material.DIRT);
-    }
-
-    @BootsInventory("boots:testinv")
-    public Inventory getTestInv() {
-        return new InventoryBuilder("Boots Test Inventory")
-                .addItems(new ItemStack(Material.CHEST))
-                .craft();
-    }
-
-    @BootsBossBar("boots:testbar")
-    public BossBar getTestBossBar() {
-        return Bukkit.createBossBar("Test Bar", BarColor.BLUE,  BarStyle.SOLID);
-    }
-
 }
