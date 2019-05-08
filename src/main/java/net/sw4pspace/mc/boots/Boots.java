@@ -23,7 +23,9 @@ import com.google.gson.GsonBuilder;
 import lombok.Getter;
 import net.sw4pspace.mc.boots.manager.BossBarManager;
 import net.sw4pspace.mc.boots.manager.InventoryManager;
+import net.sw4pspace.mc.boots.models.RegionSelection;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 
 import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -62,4 +64,9 @@ public class Boots {
     public static AtomicDouble getCurrentTps() {
         return currentTps;
     }
+
+    public static RegionSelection selectRegion(Location pos1, Location pos2) {
+        return new RegionSelection(pos1, pos2);
+    }
+
 }
