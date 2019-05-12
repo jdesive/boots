@@ -27,4 +27,8 @@ public class BootsRegistrationException extends RuntimeException {
     public BootsRegistrationException(Class<?> scanClazz, Class<?> annotation, Class<?> clazz) {
         super("Class [" + scanClazz.getName() + "] has the " + annotation.getClass().getName() + " but does not extend a type of " + clazz.getName());
     }
+
+    public BootsRegistrationException(Class<?> scanClazz, Class<?> annotation) {
+        super("Class [" + scanClazz.getName() + "] has the " + annotation.getClass().getName() + " but is not of the correct type");
+    }
 }

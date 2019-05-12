@@ -19,13 +19,11 @@ package net.sw4pspace.mc.boots.init;
 import net.sw4pspace.mc.boots.Boots;
 import net.sw4pspace.mc.boots.BootsManager;
 import net.sw4pspace.mc.boots.annotations.BootsCommand;
-import net.sw4pspace.mc.boots.annotations.BootsListener;
 import net.sw4pspace.mc.boots.exception.BootsRegistrationException;
 import net.sw4pspace.mc.boots.models.RegisteredCommand;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandMap;
 import org.bukkit.command.defaults.BukkitCommand;
-import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 
 import java.lang.reflect.Field;
@@ -60,7 +58,7 @@ public class CommandInitializer implements Initializer<RegisteredCommand> {
     private void load(Class<?> clazz, Plugin plugin) {
         BukkitCommand command = clazz.equals(plugin.getClass()) ?
                 (BukkitCommand) plugin :
-                (BukkitCommand) newInstanceFromName(clazz.getName());
+                (BukkitCommand) instanceFromName(clazz.getName());
         BootsManager.getRegisteredCommands().put(new RegisteredCommand(clazz, command), plugin);
     }
 

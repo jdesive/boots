@@ -52,6 +52,7 @@ public class BootsManager {
 
     // Registered Items Maps
     private static List<Plugin> registeredPlugins = Lists.newArrayList();
+    @Getter private static HashMap<String, Object> annotatedClasses = Maps.newHashMap();
     @Getter private static HashMap<RegisteredRecipe, Plugin> registeredRecipes = Maps.newHashMap();
     @Getter private static HashMap<RegisteredAdvancement, Plugin> registeredAdvancements = Maps.newHashMap();
     @Getter private static HashMap<RegisteredInventory, Plugin> registeredInventories = Maps.newHashMap();
@@ -60,6 +61,9 @@ public class BootsManager {
     @Getter private static HashMap<OnRegisterMethod, Plugin> onRegisterMethods = Maps.newHashMap();
     @Getter private static HashMap<RegisteredCommand, Plugin> registeredCommands = Maps.newHashMap();
     @Getter private static HashMap<RegisteredBossBar, Plugin> registeredBossBars = Maps.newHashMap();
+    @Getter private static HashMap<RegisteredJSONConfigFile, Plugin> registeredJSONConfigFiles = Maps.newHashMap();
+    @Getter private static HashMap<Class<?>, Plugin> registeredDependencies = Maps.newHashMap();
+    @Getter private static HashMap<RegisteredDependency, Plugin> registeredInjections = Maps.newHashMap();
 
     // Initializers
     private static ListenerInitializer listenerInitializer = new ListenerInitializer();
@@ -70,16 +74,22 @@ public class BootsManager {
     private static CommandInitializer commandInitializer = new CommandInitializer();
     private static AdvancementInitializer advancementInitializer = new AdvancementInitializer();
     private static BossBarInitializer bossBarInitializer = new BossBarInitializer();
+    private static JSONConfigurationFileInitializer jsonConfigurationFileInitializer = new JSONConfigurationFileInitializer();
+    private static ImplmentedByInitializer implmentedByInitializer = new ImplmentedByInitializer();
+    private static BootsInjectInitializer bootsInjectInitializer = new BootsInjectInitializer();
 
     @Getter
     private static List<Initializer<?>> initializers = Lists.newArrayList(
+            jsonConfigurationFileInitializer,
             listenerInitializer,
             inventoryInitializer,
             recipeInitializer,
             scheduledTaskInitializer,
             onRegisterInitializer,
             commandInitializer,
-            bossBarInitializer
+            bossBarInitializer,
+            implmentedByInitializer,
+            bootsInjectInitializer
     );
 
     BootsManager(JavaPlugin plugin, ClassLoader cl) {
@@ -100,14 +110,17 @@ public class BootsManager {
         if (registeredPlugins.contains(plugin)) return;
         registerBootsPlugin(plugin);
         handleLoadingClasses(plugin);
+        runInitializer(registeredDependencies, plugin, implmentedByInitializer);
+        runInitializer(registeredInjections, plugin, bootsInjectInitializer);
+        runInitializer(registeredJSONConfigFiles, plugin, jsonConfigurationFileInitializer);
         runInitializer(listeners, plugin, listenerInitializer);
         runInitializer(registeredScheduledTasks, plugin, scheduledTaskInitializer);
-        runInitializer(onRegisterMethods, plugin, onRegisterInitializer);
         runInitializer(registeredRecipes, plugin, recipeInitializer);
         runInitializer(registeredInventories, plugin, inventoryInitializer);
         runInitializer(registeredCommands, plugin, commandInitializer);
         runInitializer(registeredAdvancements, plugin, advancementInitializer);
         runInitializer(registeredBossBars, plugin, bossBarInitializer);
+        runInitializer(onRegisterMethods, plugin, onRegisterInitializer);
         registeredPlugins.add(plugin);
     }
 

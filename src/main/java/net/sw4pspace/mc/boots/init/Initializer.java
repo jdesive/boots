@@ -17,6 +17,7 @@
 package net.sw4pspace.mc.boots.init;
 
 import net.sw4pspace.mc.boots.Boots;
+import net.sw4pspace.mc.boots.BootsManager;
 import org.bukkit.plugin.Plugin;
 
 import java.lang.reflect.InvocationTargetException;
@@ -42,17 +43,25 @@ public interface Initializer<T> {
     }
 
     default Object invokeMethod(Class<?> clazz, Method method) {
+        if(!BootsManager.getAnnotatedClasses().containsKey(clazz.getName())) {
+            instanceFromName(clazz.getName());
+        }
         try {
-            return method.invoke(clazz.newInstance());
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            return method.invoke(BootsManager.getAnnotatedClasses().get(clazz.getName()));
+        } catch (IllegalAccessException | InvocationTargetException e) {
             Boots.getBootsLogger().severe("Error invoking method [" + method.getName() + "]: " + e.getMessage());
         }
         return null;
     }
 
-    default Object newInstanceFromName(String name) {
+    default Object instanceFromName(String name) {
+        if(BootsManager.getAnnotatedClasses().containsKey(name)) {
+            return BootsManager.getAnnotatedClasses().get(name);
+        }
         try {
-            return Class.forName(name).getConstructor().newInstance();
+            Object instance = Class.forName(name).getConstructor().newInstance();
+            BootsManager.getAnnotatedClasses().put(name, instance);
+            return instance;
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException | ClassNotFoundException e) {
             Boots.getBootsLogger().severe("Error invoking class [" + name + "]: " + e.getMessage());
         }
