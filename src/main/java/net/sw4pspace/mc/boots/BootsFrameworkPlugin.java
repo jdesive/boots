@@ -40,7 +40,7 @@ public class BootsFrameworkPlugin extends JavaPlugin implements Listener {
 
     @Override
     public void onLoad() {
-        new BootsManager(this, getClassLoader());
+        new BootsManager(this);
         super.onLoad();
     }
 

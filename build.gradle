@@ -15,6 +15,7 @@
 #*/
 
 plugins {
+    id 'com.github.johnrengelman.shadow' version '5.0.0'
     id "java"
     id 'maven'
 }
@@ -34,12 +35,25 @@ repositories {
 }
 
 dependencies {
+    implementation "org.reflections:reflections:${reflectionsVerison}"
     implementation "org.spigotmc:spigot-api:${spigotApiVerison}"
 
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
     deployerJars "org.apache.maven.wagon:wagon-http:2.2"
+}
+
+jar {
+    baseName = bootsName + "-no-deps"
+}
+
+shadowJar {
+    classifier = null
+    dependencies {
+        include(dependency('org.reflections:reflections:.*'))
+        include(dependency('org.javassist:javassist:.*'))
+    }
 }
 
 uploadArchives {

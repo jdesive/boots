@@ -28,6 +28,12 @@ import org.bukkit.GameMode;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.reflections.Reflections;
+import org.reflections.scanners.FieldAnnotationsScanner;
+import org.reflections.scanners.MethodAnnotationsScanner;
+import org.reflections.scanners.SubTypesScanner;
+import org.reflections.scanners.TypeAnnotationsScanner;
+import org.reflections.util.ClasspathHelper;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,7 +54,6 @@ import java.util.logging.Logger;
 public class BootsManager {
 
     private static Logger logger;
-    private static ClassLoader classLoader;
 
     // Registered Items Maps
     private static List<Plugin> registeredPlugins = Lists.newArrayList();
@@ -61,26 +66,26 @@ public class BootsManager {
     @Getter private static HashMap<OnRegisterMethod, Plugin> onRegisterMethods = Maps.newHashMap();
     @Getter private static HashMap<RegisteredCommand, Plugin> registeredCommands = Maps.newHashMap();
     @Getter private static HashMap<RegisteredBossBar, Plugin> registeredBossBars = Maps.newHashMap();
-    @Getter private static HashMap<RegisteredJSONConfigFile, Plugin> registeredJSONConfigFiles = Maps.newHashMap();
+    //@Getter private static HashMap<RegisteredJSONConfigFile, Plugin> registeredJSONConfigFiles = Maps.newHashMap();
     @Getter private static HashMap<Class<?>, Plugin> registeredDependencies = Maps.newHashMap();
     @Getter private static HashMap<RegisteredDependency, Plugin> registeredInjections = Maps.newHashMap();
 
     // Initializers
-    private static ListenerInitializer listenerInitializer = new ListenerInitializer();
+    private static ListenerClassInitializer listenerInitializer = new ListenerClassInitializer();
     private static InventoryInitializer inventoryInitializer = new InventoryInitializer();
     private static RecipeInitializer recipeInitializer = new RecipeInitializer();
     private static ScheduledTaskInitializer scheduledTaskInitializer = new ScheduledTaskInitializer();
     private static OnRegisterInitializer onRegisterInitializer = new OnRegisterInitializer();
-    private static CommandInitializer commandInitializer = new CommandInitializer();
+    private static CommandClassInitializer commandInitializer = new CommandClassInitializer();
     private static AdvancementInitializer advancementInitializer = new AdvancementInitializer();
     private static BossBarInitializer bossBarInitializer = new BossBarInitializer();
-    private static JSONConfigurationFileInitializer jsonConfigurationFileInitializer = new JSONConfigurationFileInitializer();
-    private static ImplmentedByInitializer implmentedByInitializer = new ImplmentedByInitializer();
+    //private static JSONConfigurationFileInitializer jsonConfigurationFileInitializer = new JSONConfigurationFileInitializer();
+    private static ImplmentedByClassInitializer implmentedByInitializer = new ImplmentedByClassInitializer();
     private static BootsInjectInitializer bootsInjectInitializer = new BootsInjectInitializer();
 
     @Getter
     private static List<Initializer<?>> initializers = Lists.newArrayList(
-            jsonConfigurationFileInitializer,
+            //jsonConfigurationFileInitializer,
             listenerInitializer,
             inventoryInitializer,
             recipeInitializer,
@@ -92,9 +97,8 @@ public class BootsManager {
             bootsInjectInitializer
     );
 
-    BootsManager(JavaPlugin plugin, ClassLoader cl) {
+    BootsManager(JavaPlugin plugin) {
         logger = plugin.getLogger();
-        BootsManager.classLoader = cl;
     }
 
     /**
@@ -109,10 +113,11 @@ public class BootsManager {
     public static void register(Plugin plugin) {
         if (registeredPlugins.contains(plugin)) return;
         registerBootsPlugin(plugin);
-        handleLoadingClasses(plugin);
+        //handleLoadingClasses(plugin);
+        scanPluginClasses(plugin);
         runInitializer(registeredDependencies, plugin, implmentedByInitializer);
         runInitializer(registeredInjections, plugin, bootsInjectInitializer);
-        runInitializer(registeredJSONConfigFiles, plugin, jsonConfigurationFileInitializer);
+        //runInitializer(registeredJSONConfigFiles, plugin, jsonConfigurationFileInitializer);
         runInitializer(listeners, plugin, listenerInitializer);
         runInitializer(registeredScheduledTasks, plugin, scheduledTaskInitializer);
         runInitializer(registeredRecipes, plugin, recipeInitializer);
@@ -170,36 +175,33 @@ public class BootsManager {
 
     // Class Loading Methods
 
-    private static void handleLoadingClasses(Plugin plugin) {
-        Method getFileMethod;
+    private static void scanPluginClasses(Plugin plugin) {
+        Method getClassLoaderMethod;
         try {
-            getFileMethod = JavaPlugin.class.getDeclaredMethod("getFile");
-            getFileMethod.setAccessible(true);
-            File file = (File) getFileMethod.invoke(plugin);
-            List<Class<?>> classes = findJarClasses(file);
-            classes.forEach(clazz -> initializers.forEach(init -> init.check(clazz, plugin)));
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | IOException | ClassNotFoundException e) {
+            getClassLoaderMethod = JavaPlugin.class.getDeclaredMethod("getClassLoader");
+            getClassLoaderMethod.setAccessible(true);
+
+            ClassLoader pluginClassLoader = (ClassLoader) getClassLoaderMethod.invoke(plugin);
+            Reflections reflections = new Reflections(
+                    ClasspathHelper.forClass(plugin.getClass(), pluginClassLoader),
+                    new SubTypesScanner(false),
+                    new TypeAnnotationsScanner(),
+                    new FieldAnnotationsScanner(),
+                    new MethodAnnotationsScanner());
+
+            reflections.getTypesAnnotatedWith(ImplmenetedBy.class).forEach(clazz -> implmentedByInitializer.check(clazz, plugin));
+            reflections.getFieldsAnnotatedWith(BootsInject.class).forEach(field -> bootsInjectInitializer.check(field, plugin));
+            reflections.getTypesAnnotatedWith(BootsListener.class).forEach(clazz -> listenerInitializer.check(clazz, plugin));
+            reflections.getTypesAnnotatedWith(BootsCommand.class).forEach(clazz -> commandInitializer.check(clazz, plugin));
+            reflections.getMethodsAnnotatedWith(BootsInventory.class).forEach(method -> inventoryInitializer.check(method, plugin));
+            reflections.getMethodsAnnotatedWith(BootsScheduledTask.class).forEach(method -> scheduledTaskInitializer.check(method, plugin));
+            reflections.getMethodsAnnotatedWith(CraftingRecipe.class).forEach(method -> recipeInitializer.check(method, plugin));
+            reflections.getMethodsAnnotatedWith(BootsBossBar.class).forEach(method -> bossBarInitializer.check(method, plugin));
+            reflections.getMethodsAnnotatedWith(Advancement.class).forEach(method -> advancementInitializer.check(method, plugin));
+            reflections.getMethodsAnnotatedWith(OnRegister.class).forEach(method -> onRegisterInitializer.check(method, plugin));
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             logger.severe("Error loading classes for plugin \'" + plugin.getName() + "\': " + e.getMessage());
         }
-    }
-
-    private static List<Class<?>> findJarClasses(File file) throws IOException, ClassNotFoundException {
-        ArrayList<Class<?>> classes = new ArrayList<>();
-        JarFile jar = new JarFile(file);
-        Enumeration<JarEntry> entries = jar.entries();
-        while (entries.hasMoreElements()) {
-            JarEntry entry = entries.nextElement();
-            String name = entry.getName();
-            if (name.endsWith(".class")) {
-                name = name.substring(0, name.lastIndexOf('.'));
-                // So i dont like that we load each class then parse them...
-                // Spigot/Bukkit will load the classes again anyway. Nothing i can do about that.
-                // Its a giant waste of time here, needs some work - Sw4p TODO
-                Class<?> cls = classLoader.loadClass(name.replace("/", "."));
-                classes.add(cls);
-            }
-        }
-        return classes;
     }
 
 }

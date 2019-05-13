@@ -26,32 +26,21 @@ import org.bukkit.plugin.Plugin;
 
 import java.lang.reflect.Method;
 
-public class InventoryInitializer implements Initializer<RegisteredInventory>{
+public class InventoryInitializer implements MethodInitializer<RegisteredInventory> {
 
     @Override
-    public void check(Class<?> clazz, Plugin plugin) {
-        for(Method method : clazz.getDeclaredMethods()) {
-            if(method.isAnnotationPresent(BootsInventory.class)) {
-                if (method.getReturnType().isAssignableFrom(org.bukkit.inventory.Inventory.class)) {
-                    load(method.getAnnotation(BootsInventory.class), method, clazz, plugin);
-                } else {
-                    throw new BootsRegistrationException(method, BootsInventory.class, Inventory.class);
-                }
-            }
-        }
+    public void check(Method method, Plugin plugin) {
+        BootsInventory annotation = method.getAnnotation(BootsInventory.class);
+        Inventory inv = (Inventory) (method.getDeclaringClass().equals(plugin.getClass()) ?
+                invokeMainClassMethod(plugin, method) :
+                invokeMethod(method.getDeclaringClass(), method));
+        BootsManager.getRegisteredInventories().put(new RegisteredInventory(method.getDeclaringClass(), annotation.value(), inv), plugin);
     }
 
     @Override
     public void register(RegisteredInventory registeredInventory, Plugin plugin) {
         Boots.getInventoryRegistry().registerInventory(registeredInventory);
         Boots.getBootsLogger().info(getPluginName(plugin) + "Registered inventory [" + registeredInventory.getKey() + "] in class [" + registeredInventory.getClazz().getName());
-    }
-
-    private void load(BootsInventory bootsInventory, Method method, Class<?> clazz, Plugin plugin) {
-        org.bukkit.inventory.Inventory inv = (org.bukkit.inventory.Inventory) (clazz.equals(plugin.getClass()) ?
-                invokeMainClassMethod(plugin, method) :
-                invokeMethod(clazz, method));
-        BootsManager.getRegisteredInventories().put(new RegisteredInventory(clazz, bootsInventory.value(), inv), plugin);
     }
 
 }

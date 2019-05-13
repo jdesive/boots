@@ -16,6 +16,7 @@
 
 package net.sw4pspace.mc.boots.di;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import lombok.Getter;
 
@@ -23,7 +24,6 @@ import java.util.HashMap;
 
 public class Piston {
 
-    // Dependency Injection
     @Getter private static final HashMap<Class, Class> pistonClassMap = Maps.newHashMap();
     @Getter private static final HashMap<Class, Object> pistonScope = Maps.newHashMap();
 
@@ -35,11 +35,18 @@ public class Piston {
     }
 
     public void register(Class iface, Class impl) {
-        pistonClassMap.put(iface, impl);
+        Preconditions.checkNotNull(iface, "Interface cannot be null");
+        Preconditions.checkNotNull(impl, "Implementation cannot be null");
+        synchronized (pistonClassMap) {
+            pistonClassMap.put(iface, impl);
+        }
     }
 
     public Object load(Class iface) throws IllegalAccessException, InstantiationException {
         Class implClass = pistonClassMap.get(iface);
+        if(implClass == null)
+            throw new NullPointerException("Cannot find impl class for interface [" + iface.getName() + "]");
+
         synchronized (pistonScope) {
             Object service = implClass.newInstance();
             pistonScope.put(implClass, service);

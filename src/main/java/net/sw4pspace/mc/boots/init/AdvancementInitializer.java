@@ -19,27 +19,20 @@ package net.sw4pspace.mc.boots.init;
 import net.sw4pspace.mc.boots.Boots;
 import net.sw4pspace.mc.boots.BootsManager;
 import net.sw4pspace.mc.boots.annotations.Advancement;
-import net.sw4pspace.mc.boots.annotations.BootsListener;
-import net.sw4pspace.mc.boots.exception.BootsRegistrationException;
 import net.sw4pspace.mc.boots.models.RegisteredAdvancement;
-import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 
 import java.lang.reflect.Method;
 
-public class AdvancementInitializer implements Initializer<RegisteredAdvancement>{
+public class AdvancementInitializer implements MethodInitializer<RegisteredAdvancement> {
 
     @Override
-    public void check(Class<?> clazz, Plugin plugin) {
-        for (Method method : clazz.getDeclaredMethods()) {
-            if (method.isAnnotationPresent(Advancement.class)) {
-                if (method.getReturnType().isAssignableFrom(org.bukkit.advancement.Advancement.class)) {
-                    load(method, clazz, plugin);
-                } else {
-                    Boots.getBootsLogger().severe("Method [" + method.getName() + "] has the Advancement annotation but doesn't return a type of " + org.bukkit.advancement.Advancement.class.getName());
-                    // TODO Throw exception
-                }
-            }
+    public void check(Method method, Plugin plugin) {
+        if (method.getReturnType().isAssignableFrom(org.bukkit.advancement.Advancement.class)) {
+            load(method, method.getDeclaringClass(), plugin);
+        } else {
+            Boots.getBootsLogger().severe("Method [" + method.getName() + "] has the Advancement annotation but doesn't return a type of " + org.bukkit.advancement.Advancement.class.getName());
+            // TODO Throw exception
         }
     }
 

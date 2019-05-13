@@ -25,9 +25,7 @@ import java.lang.reflect.Method;
 
 public interface Initializer<T> {
 
-    void check(Class<?> clazz, Plugin plugin);
-
-    void register(T clazz, Plugin plugin);
+    void register(T obj, Plugin plugin);
 
     default String getPluginName(Plugin plugin) {
         return "[".concat(plugin.getName()).concat("] ");

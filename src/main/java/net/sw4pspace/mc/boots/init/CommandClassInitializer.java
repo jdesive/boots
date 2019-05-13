@@ -28,7 +28,7 @@ import org.bukkit.plugin.Plugin;
 
 import java.lang.reflect.Field;
 
-public class CommandInitializer implements Initializer<RegisteredCommand> {
+public class CommandClassInitializer implements ClassInitializer<RegisteredCommand> {
 
     @Override
     public void check(Class<?> clazz, Plugin plugin) {

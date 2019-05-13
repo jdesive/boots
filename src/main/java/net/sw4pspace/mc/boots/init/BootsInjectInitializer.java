@@ -19,22 +19,17 @@ package net.sw4pspace.mc.boots.init;
 import net.sw4pspace.mc.boots.Boots;
 import net.sw4pspace.mc.boots.BootsManager;
 import net.sw4pspace.mc.boots.annotations.BootsInject;
-import net.sw4pspace.mc.boots.annotations.ImplmenetedBy;
-import net.sw4pspace.mc.boots.exception.BootsRegistrationException;
 import net.sw4pspace.mc.boots.models.RegisteredDependency;
 import org.bukkit.plugin.Plugin;
 
 import java.lang.reflect.Field;
 
-public class BootsInjectInitializer implements Initializer<RegisteredDependency>{
+public class BootsInjectInitializer implements FieldInitializer<RegisteredDependency> {
 
     @Override
-    public void check(Class<?> clazz, Plugin plugin) {
-        for(Field field : clazz.getDeclaredFields()) {
-            if(field.isAnnotationPresent(BootsInject.class)) {
-                load(clazz, field, plugin);
-            }
-        }
+    public void check(Field field, Plugin plugin) {
+        Object instance = field.getDeclaringClass().equals(plugin.getClass()) ? plugin : instanceFromName(field.getDeclaringClass().getName());
+        BootsManager.getRegisteredInjections().put(new RegisteredDependency(field.getDeclaringClass(), instance, field), plugin);
     }
 
     @Override
@@ -46,11 +41,6 @@ public class BootsInjectInitializer implements Initializer<RegisteredDependency>
         } catch (IllegalAccessException | InstantiationException e) {
             Boots.getBootsLogger().info(getPluginName(plugin) + "Error injecting dependency [" + dependency.getField().getType() + "] in field [" + dependency.getField().getName() + "] in class " + dependency.getClazz().getName() + ": " + e.getMessage());
         }
-    }
-
-    private void load(Class<?> clazz, Field field, Plugin plugin){
-        Object instance = clazz.equals(plugin.getClass()) ? plugin : instanceFromName(clazz.getName());
-        BootsManager.getRegisteredInjections().put(new RegisteredDependency(clazz, instance, field), plugin);
     }
 
 }

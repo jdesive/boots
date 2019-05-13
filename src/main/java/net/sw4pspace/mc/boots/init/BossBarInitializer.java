@@ -26,18 +26,14 @@ import org.bukkit.plugin.Plugin;
 import java.lang.reflect.MalformedParametersException;
 import java.lang.reflect.Method;
 
-public class BossBarInitializer implements Initializer<RegisteredBossBar>{
+public class BossBarInitializer implements MethodInitializer<RegisteredBossBar> {
 
     @Override
-    public void check(Class<?> clazz, Plugin plugin) {
-        for (Method method : clazz.getDeclaredMethods()) {
-            if (method.isAnnotationPresent(BootsBossBar.class)) {
-                if (method.getParameterCount() > 0) {
-                    throw new MalformedParametersException("BootsBossBar methods cannot have parameters");
-                }
-                load(method.getAnnotation(BootsBossBar.class), method, clazz, plugin);
-            }
+    public void check(Method method, Plugin plugin) {
+        if (method.getParameterCount() > 0) {
+            throw new MalformedParametersException("BootsBossBar methods cannot have parameters");
         }
+        load(method.getAnnotation(BootsBossBar.class), method, method.getDeclaringClass(), plugin);
     }
 
     @Override

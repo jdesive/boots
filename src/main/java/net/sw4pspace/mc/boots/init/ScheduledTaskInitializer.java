@@ -19,35 +19,30 @@ package net.sw4pspace.mc.boots.init;
 import com.google.common.base.Strings;
 import net.sw4pspace.mc.boots.Boots;
 import net.sw4pspace.mc.boots.BootsManager;
-import net.sw4pspace.mc.boots.annotations.BootsListener;
 import net.sw4pspace.mc.boots.annotations.BootsScheduledTask;
-import net.sw4pspace.mc.boots.exception.BootsRegistrationException;
 import net.sw4pspace.mc.boots.models.RegisteredScheduledTask;
 import org.bukkit.Bukkit;
-import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 
 import java.lang.reflect.MalformedParametersException;
 import java.lang.reflect.Method;
 
-public class ScheduledTaskInitializer implements Initializer<RegisteredScheduledTask>{
+public class ScheduledTaskInitializer implements MethodInitializer<RegisteredScheduledTask> {
 
     @Override
-    public void check(Class<?> clazz, Plugin plugin) {
-        for (Method declaredMethod : clazz.getDeclaredMethods()) {
-            if (declaredMethod.isAnnotationPresent(BootsScheduledTask.class)) {
-                BootsScheduledTask bootsScheduledTask = declaredMethod.getAnnotation(BootsScheduledTask.class);
-                if (declaredMethod.getParameterCount() > 0) {
-                    throw new MalformedParametersException("Scheduled Task [" + bootsScheduledTask.name() + "] has parameters. Scheduled Tasks are not allowed to have parameters");
-                }
-                if (Strings.isNullOrEmpty(bootsScheduledTask.name())) {
-                    throw new IllegalArgumentException("Scheduled Task in class [" + clazz.getName() + "] tried to register without a name");
-                }
-                if (bootsScheduledTask.delay() <= 0L && bootsScheduledTask.interval() <= 0L) {
-                    throw new IllegalArgumentException("Scheduled task [" + bootsScheduledTask.name() + "] has to have either a delay or interval. They both cannot be 0");
-                }
-                load(bootsScheduledTask, declaredMethod, clazz, plugin);
+    public void check(Method method, Plugin plugin) {
+        if (method.isAnnotationPresent(BootsScheduledTask.class)) {
+            BootsScheduledTask bootsScheduledTask = method.getAnnotation(BootsScheduledTask.class);
+            if (method.getParameterCount() > 0) {
+                throw new MalformedParametersException("Scheduled Task [" + bootsScheduledTask.name() + "] has parameters. Scheduled Tasks are not allowed to have parameters");
             }
+            if (Strings.isNullOrEmpty(bootsScheduledTask.name())) {
+                throw new IllegalArgumentException("Scheduled Task in class [" + method.getDeclaringClass().getName() + "] tried to register without a name");
+            }
+            if (bootsScheduledTask.delay() <= 0L && bootsScheduledTask.interval() <= 0L) {
+                throw new IllegalArgumentException("Scheduled task [" + bootsScheduledTask.name() + "] has to have either a delay or interval. They both cannot be 0");
+            }
+            load(bootsScheduledTask, method, method.getDeclaringClass(), plugin);
         }
     }
 
