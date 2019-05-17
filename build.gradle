@@ -44,8 +44,8 @@ dependencies {
     deployerJars "org.apache.maven.wagon:wagon-http:2.2"
 }
 
-jar {
-    baseName = bootsName + "-no-deps"
+configurations {
+    jar.archiveName = bootsName + '-no-deps-' + bootsVersion + '.jar';
 }
 
 shadowJar {

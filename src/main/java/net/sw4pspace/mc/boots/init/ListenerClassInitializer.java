@@ -20,10 +20,17 @@ import net.sw4pspace.mc.boots.Boots;
 import net.sw4pspace.mc.boots.BootsManager;
 import net.sw4pspace.mc.boots.annotations.BootsListener;
 import net.sw4pspace.mc.boots.exception.BootsRegistrationException;
+import net.sw4pspace.mc.boots.processor.BootsListenerProcessor;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 
 public class ListenerClassInitializer implements ClassInitializer<Listener> {
+
+    private BootsListenerProcessor processor;
+
+    public ListenerClassInitializer(BootsListenerProcessor processor) {
+        this.processor = processor;
+    }
 
     @Override
     public void check(Class<?> clazz, Plugin plugin) {
@@ -46,7 +53,7 @@ public class ListenerClassInitializer implements ClassInitializer<Listener> {
         Listener listener = clazz.equals(plugin.getClass()) ?
                 (Listener) plugin :
                 (Listener) instanceFromName(clazz.getName());
-        BootsManager.getListeners().put(listener, plugin);
+        processor.getRegistry().put(listener, plugin);
 
     }
 

@@ -14,15 +14,14 @@
  * copies or substantial portions of the Software.
  */
 
-package net.sw4pspace.mc.boots.annotations;
+package net.sw4pspace.mc.boots.processor;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+public class ProcessorPriority {
 
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface ImplmenetedBy {
-    Class value();
+    public static final Integer SYSTEM = -1;
+    public static final Integer HIGH= 301;
+    public static final Integer MEDIUM = 601;
+    public static final Integer LOW = 901;
+    public static final Integer LOWEST = Integer.MAX_VALUE;
+
 }

@@ -21,6 +21,7 @@ import net.sw4pspace.mc.boots.BootsManager;
 import net.sw4pspace.mc.boots.annotations.CraftingRecipe;
 import net.sw4pspace.mc.boots.exception.BootsRegistrationException;
 import net.sw4pspace.mc.boots.models.RegisteredRecipe;
+import net.sw4pspace.mc.boots.processor.CraftingRecipeProcessor;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
@@ -29,6 +30,12 @@ import org.bukkit.plugin.Plugin;
 import java.lang.reflect.Method;
 
 public class RecipeInitializer implements MethodInitializer<RegisteredRecipe> {
+
+    private CraftingRecipeProcessor processor;
+
+    public RecipeInitializer(CraftingRecipeProcessor processor) {
+        this.processor = processor;
+    }
 
     @Override
     public void check(Method method, Plugin plugin) {
@@ -49,7 +56,7 @@ public class RecipeInitializer implements MethodInitializer<RegisteredRecipe> {
         Recipe recipe = clazz.equals(plugin.getClass()) ?
                 (Recipe) invokeMainClassMethod(plugin, method) :
                 (Recipe) invokeMethod(clazz, method);
-        BootsManager.getRegisteredRecipes().put(new RegisteredRecipe(clazz, method, recipe), plugin);
+        processor.getRegistry().put(new RegisteredRecipe(clazz, method, recipe), plugin);
     }
 
 }

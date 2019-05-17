@@ -18,19 +18,26 @@ package net.sw4pspace.mc.boots.init;
 
 import net.sw4pspace.mc.boots.Boots;
 import net.sw4pspace.mc.boots.BootsManager;
-import net.sw4pspace.mc.boots.annotations.ImplmenetedBy;
+import net.sw4pspace.mc.boots.annotations.ImplementedBy;
 import net.sw4pspace.mc.boots.exception.BootsRegistrationException;
+import net.sw4pspace.mc.boots.processor.ImplementedByProcessor;
 import org.bukkit.plugin.Plugin;
 
-public class ImplmentedByClassInitializer implements ClassInitializer<Class<?>> {
+public class ImplementedByClassInitializer implements ClassInitializer<Class<?>> {
+
+    private ImplementedByProcessor processor;
+
+    public ImplementedByClassInitializer(ImplementedByProcessor processor) {
+        this.processor = processor;
+    }
 
     @Override
     public void check(Class<?> clazz, Plugin plugin) {
-        if (clazz.isAnnotationPresent(ImplmenetedBy.class)) {
+        if (clazz.isAnnotationPresent(ImplementedBy.class)) {
             if (clazz.isInterface()) {
                 load(clazz, plugin);
             } else {
-                throw new BootsRegistrationException(clazz, ImplmenetedBy.class);
+                throw new BootsRegistrationException(clazz, ImplementedBy.class);
             }
         }
     }
@@ -46,9 +53,9 @@ public class ImplmentedByClassInitializer implements ClassInitializer<Class<?>> 
     }
 
     private void load(Class<?> clazz, Plugin plugin){
-        ImplmenetedBy annotation = clazz.getAnnotation(ImplmenetedBy.class);
+        ImplementedBy annotation = clazz.getAnnotation(ImplementedBy.class);
         Boots.getPiston().register(clazz, annotation.value());
-        BootsManager.getRegisteredDependencies().put(clazz, plugin);
+        processor.getRegistry().put(clazz, plugin);
         Boots.getBootsLogger().info(getPluginName(plugin) + "Registering interface [" + clazz.getName() + "] to " + annotation.value().getName());
     }
 

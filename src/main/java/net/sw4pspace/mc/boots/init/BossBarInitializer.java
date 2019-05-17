@@ -20,6 +20,7 @@ import net.sw4pspace.mc.boots.Boots;
 import net.sw4pspace.mc.boots.BootsManager;
 import net.sw4pspace.mc.boots.annotations.BootsBossBar;
 import net.sw4pspace.mc.boots.models.RegisteredBossBar;
+import net.sw4pspace.mc.boots.processor.BootsBossBarProcessor;
 import org.bukkit.boss.BossBar;
 import org.bukkit.plugin.Plugin;
 
@@ -27,6 +28,12 @@ import java.lang.reflect.MalformedParametersException;
 import java.lang.reflect.Method;
 
 public class BossBarInitializer implements MethodInitializer<RegisteredBossBar> {
+
+    private BootsBossBarProcessor processor;
+
+    public BossBarInitializer(BootsBossBarProcessor processor) {
+        this.processor = processor;
+    }
 
     @Override
     public void check(Method method, Plugin plugin) {
@@ -46,7 +53,7 @@ public class BossBarInitializer implements MethodInitializer<RegisteredBossBar> 
         BossBar bossbar = clazz.equals(plugin.getClass()) ?
                 (BossBar) invokeMainClassMethod(plugin, method) :
                 (BossBar) invokeMethod(clazz, method);
-        BootsManager.getRegisteredBossBars().put(new RegisteredBossBar(bootsBossBar.value(), bossbar, clazz), plugin);
+        processor.getRegistry().put(new RegisteredBossBar(bootsBossBar.value(), bossbar, clazz), plugin);
 
     }
 

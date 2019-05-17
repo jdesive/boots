@@ -19,7 +19,9 @@ package net.sw4pspace.mc.boots.di;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import lombok.Getter;
+import net.sw4pspace.mc.boots.Boots;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class Piston {

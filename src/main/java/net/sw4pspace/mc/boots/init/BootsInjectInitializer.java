@@ -20,16 +20,23 @@ import net.sw4pspace.mc.boots.Boots;
 import net.sw4pspace.mc.boots.BootsManager;
 import net.sw4pspace.mc.boots.annotations.BootsInject;
 import net.sw4pspace.mc.boots.models.RegisteredDependency;
+import net.sw4pspace.mc.boots.processor.BootsInjectProcessor;
 import org.bukkit.plugin.Plugin;
 
 import java.lang.reflect.Field;
 
 public class BootsInjectInitializer implements FieldInitializer<RegisteredDependency> {
 
+    private BootsInjectProcessor processor;
+
+    public BootsInjectInitializer(BootsInjectProcessor processor) {
+        this.processor = processor;
+    }
+
     @Override
     public void check(Field field, Plugin plugin) {
         Object instance = field.getDeclaringClass().equals(plugin.getClass()) ? plugin : instanceFromName(field.getDeclaringClass().getName());
-        BootsManager.getRegisteredInjections().put(new RegisteredDependency(field.getDeclaringClass(), instance, field), plugin);
+        processor.getRegistry().put(new RegisteredDependency(field.getDeclaringClass(), instance, field), plugin);
     }
 
     @Override

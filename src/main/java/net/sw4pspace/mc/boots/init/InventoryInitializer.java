@@ -21,6 +21,7 @@ import net.sw4pspace.mc.boots.BootsManager;
 import net.sw4pspace.mc.boots.annotations.BootsInventory;
 import net.sw4pspace.mc.boots.exception.BootsRegistrationException;
 import net.sw4pspace.mc.boots.models.RegisteredInventory;
+import net.sw4pspace.mc.boots.processor.BootsInventoryProcessor;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
 
@@ -28,13 +29,19 @@ import java.lang.reflect.Method;
 
 public class InventoryInitializer implements MethodInitializer<RegisteredInventory> {
 
+    private BootsInventoryProcessor processor;
+
+    public InventoryInitializer(BootsInventoryProcessor processor) {
+        this.processor = processor;
+    }
+
     @Override
     public void check(Method method, Plugin plugin) {
         BootsInventory annotation = method.getAnnotation(BootsInventory.class);
         Inventory inv = (Inventory) (method.getDeclaringClass().equals(plugin.getClass()) ?
                 invokeMainClassMethod(plugin, method) :
                 invokeMethod(method.getDeclaringClass(), method));
-        BootsManager.getRegisteredInventories().put(new RegisteredInventory(method.getDeclaringClass(), annotation.value(), inv), plugin);
+        processor.getRegistry().put(new RegisteredInventory(method.getDeclaringClass(), annotation.value(), inv), plugin);
     }
 
     @Override

@@ -20,12 +20,19 @@ import net.sw4pspace.mc.boots.Boots;
 import net.sw4pspace.mc.boots.BootsManager;
 import net.sw4pspace.mc.boots.annotations.OnRegister;
 import net.sw4pspace.mc.boots.models.OnRegisterMethod;
+import net.sw4pspace.mc.boots.processor.OnRegisterProcessor;
 import org.bukkit.plugin.Plugin;
 
 import java.lang.reflect.MalformedParametersException;
 import java.lang.reflect.Method;
 
 public class OnRegisterInitializer implements MethodInitializer<OnRegisterMethod> {
+
+    private OnRegisterProcessor processor;
+
+    public OnRegisterInitializer(OnRegisterProcessor processor) {
+        this.processor = processor;
+    }
 
     @Override
     public void check(Method method, Plugin plugin) {
@@ -45,7 +52,7 @@ public class OnRegisterInitializer implements MethodInitializer<OnRegisterMethod
         Runnable task = clazz.equals(plugin.getClass()) ?
                 () -> invokeMainClassMethod(plugin, method) :
                 () -> invokeMethod(clazz, method);
-        BootsManager.getOnRegisterMethods().put(new OnRegisterMethod(clazz, method, task), plugin);
+        processor.getRegistry().put(new OnRegisterMethod(clazz, method, task), plugin);
     }
 
 }

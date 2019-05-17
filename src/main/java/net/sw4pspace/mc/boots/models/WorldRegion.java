@@ -120,7 +120,6 @@ public class WorldRegion implements Cloneable, ConfigurationSerializable, Iterab
             this.sizeX = Math.abs(region.getXMax() - region.getXMin()) + 1;
             this.sizeY = Math.abs(region.getYMax() - region.getYMin()) + 1;
             this.sizeZ = Math.abs(region.getZMax() - region.getZMin()) + 1;
-
         }
 
         @Override

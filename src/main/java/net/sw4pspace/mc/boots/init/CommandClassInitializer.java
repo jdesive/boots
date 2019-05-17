@@ -21,6 +21,7 @@ import net.sw4pspace.mc.boots.BootsManager;
 import net.sw4pspace.mc.boots.annotations.BootsCommand;
 import net.sw4pspace.mc.boots.exception.BootsRegistrationException;
 import net.sw4pspace.mc.boots.models.RegisteredCommand;
+import net.sw4pspace.mc.boots.processor.BootsCommandProcessor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandMap;
 import org.bukkit.command.defaults.BukkitCommand;
@@ -29,6 +30,12 @@ import org.bukkit.plugin.Plugin;
 import java.lang.reflect.Field;
 
 public class CommandClassInitializer implements ClassInitializer<RegisteredCommand> {
+
+    private BootsCommandProcessor processor;
+
+    public CommandClassInitializer(BootsCommandProcessor processor) {
+        this.processor = processor;
+    }
 
     @Override
     public void check(Class<?> clazz, Plugin plugin) {
@@ -59,7 +66,7 @@ public class CommandClassInitializer implements ClassInitializer<RegisteredComma
         BukkitCommand command = clazz.equals(plugin.getClass()) ?
                 (BukkitCommand) plugin :
                 (BukkitCommand) instanceFromName(clazz.getName());
-        BootsManager.getRegisteredCommands().put(new RegisteredCommand(clazz, command), plugin);
+        processor.getRegistry().put(new RegisteredCommand(clazz, command), plugin);
     }
 
 }

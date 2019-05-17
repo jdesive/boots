@@ -20,6 +20,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.Getter;
 import net.sw4pspace.mc.boots.annotations.*;
+import net.sw4pspace.mc.boots.annotations.BootsAnnotationProcessor;
 import net.sw4pspace.mc.boots.exception.BootsInitializationException;
 import net.sw4pspace.mc.boots.init.*;
 import net.sw4pspace.mc.boots.models.*;
@@ -35,13 +36,13 @@ import org.reflections.scanners.SubTypesScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
 import org.reflections.util.ClasspathHelper;
 
-import java.io.File;
-import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Target;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 import java.util.logging.Logger;
 
 /**
@@ -58,44 +59,12 @@ public class BootsManager {
     // Registered Items Maps
     private static List<Plugin> registeredPlugins = Lists.newArrayList();
     @Getter private static HashMap<String, Object> annotatedClasses = Maps.newHashMap();
-    @Getter private static HashMap<RegisteredRecipe, Plugin> registeredRecipes = Maps.newHashMap();
-    @Getter private static HashMap<RegisteredAdvancement, Plugin> registeredAdvancements = Maps.newHashMap();
-    @Getter private static HashMap<RegisteredInventory, Plugin> registeredInventories = Maps.newHashMap();
-    @Getter private static HashMap<Listener, Plugin> listeners = Maps.newHashMap();
-    @Getter private static HashMap<RegisteredScheduledTask, Plugin> registeredScheduledTasks = Maps.newHashMap();
-    @Getter private static HashMap<OnRegisterMethod, Plugin> onRegisterMethods = Maps.newHashMap();
-    @Getter private static HashMap<RegisteredCommand, Plugin> registeredCommands = Maps.newHashMap();
-    @Getter private static HashMap<RegisteredBossBar, Plugin> registeredBossBars = Maps.newHashMap();
-    //@Getter private static HashMap<RegisteredJSONConfigFile, Plugin> registeredJSONConfigFiles = Maps.newHashMap();
-    @Getter private static HashMap<Class<?>, Plugin> registeredDependencies = Maps.newHashMap();
-    @Getter private static HashMap<RegisteredDependency, Plugin> registeredInjections = Maps.newHashMap();
+
 
     // Initializers
-    private static ListenerClassInitializer listenerInitializer = new ListenerClassInitializer();
-    private static InventoryInitializer inventoryInitializer = new InventoryInitializer();
-    private static RecipeInitializer recipeInitializer = new RecipeInitializer();
-    private static ScheduledTaskInitializer scheduledTaskInitializer = new ScheduledTaskInitializer();
-    private static OnRegisterInitializer onRegisterInitializer = new OnRegisterInitializer();
-    private static CommandClassInitializer commandInitializer = new CommandClassInitializer();
-    private static AdvancementInitializer advancementInitializer = new AdvancementInitializer();
-    private static BossBarInitializer bossBarInitializer = new BossBarInitializer();
-    //private static JSONConfigurationFileInitializer jsonConfigurationFileInitializer = new JSONConfigurationFileInitializer();
-    private static ImplmentedByClassInitializer implmentedByInitializer = new ImplmentedByClassInitializer();
-    private static BootsInjectInitializer bootsInjectInitializer = new BootsInjectInitializer();
+    private static AnnotationProcessorInitializer annotationProcessorInitializer = new AnnotationProcessorInitializer();
 
-    @Getter
-    private static List<Initializer<?>> initializers = Lists.newArrayList(
-            //jsonConfigurationFileInitializer,
-            listenerInitializer,
-            inventoryInitializer,
-            recipeInitializer,
-            scheduledTaskInitializer,
-            onRegisterInitializer,
-            commandInitializer,
-            bossBarInitializer,
-            implmentedByInitializer,
-            bootsInjectInitializer
-    );
+    private static List<RegisteredAnnotationProcessor> annotationProcessors = Lists.newArrayList();
 
     BootsManager(JavaPlugin plugin) {
         logger = plugin.getLogger();
@@ -113,20 +82,19 @@ public class BootsManager {
     public static void register(Plugin plugin) {
         if (registeredPlugins.contains(plugin)) return;
         registerBootsPlugin(plugin);
-        //handleLoadingClasses(plugin);
         scanPluginClasses(plugin);
-        runInitializer(registeredDependencies, plugin, implmentedByInitializer);
-        runInitializer(registeredInjections, plugin, bootsInjectInitializer);
-        //runInitializer(registeredJSONConfigFiles, plugin, jsonConfigurationFileInitializer);
-        runInitializer(listeners, plugin, listenerInitializer);
-        runInitializer(registeredScheduledTasks, plugin, scheduledTaskInitializer);
-        runInitializer(registeredRecipes, plugin, recipeInitializer);
-        runInitializer(registeredInventories, plugin, inventoryInitializer);
-        runInitializer(registeredCommands, plugin, commandInitializer);
-        runInitializer(registeredAdvancements, plugin, advancementInitializer);
-        runInitializer(registeredBossBars, plugin, bossBarInitializer);
-        runInitializer(onRegisterMethods, plugin, onRegisterInitializer);
+        annotationProcessors.stream()
+                .sorted(Comparator.comparing(RegisteredAnnotationProcessor::getPriority))
+                .forEach(annotationProcessor -> runInitializer(annotationProcessor.getTargetMap(), plugin, annotationProcessor.getInitializer()));
         registeredPlugins.add(plugin);
+    }
+
+    public static void registerAnnotationProcessor(RegisteredAnnotationProcessor annotationProcessor) {
+        annotationProcessors.add(annotationProcessor);
+    }
+
+    public static void registerAnnotationProcessor(Class<? extends Annotation> annotation, Initializer<?> initializer, HashMap<?, Plugin> targetMap, Plugin owningPlugin, int priority) {
+        annotationProcessors.add(new RegisteredAnnotationProcessor(annotation, initializer, targetMap, owningPlugin, priority));
     }
 
     private static <T> void runInitializer(HashMap<T, Plugin> targetMap, Plugin plugin, Initializer<T> initializer) {
@@ -178,6 +146,8 @@ public class BootsManager {
     private static void scanPluginClasses(Plugin plugin) {
         Method getClassLoaderMethod;
         try {
+            // I think that the class loader for all plugins is the same, not sure.
+            // In which case we could just grab the one from the main class and skip this reflection
             getClassLoaderMethod = JavaPlugin.class.getDeclaredMethod("getClassLoader");
             getClassLoaderMethod.setAccessible(true);
 
@@ -189,19 +159,64 @@ public class BootsManager {
                     new FieldAnnotationsScanner(),
                     new MethodAnnotationsScanner());
 
-            reflections.getTypesAnnotatedWith(ImplmenetedBy.class).forEach(clazz -> implmentedByInitializer.check(clazz, plugin));
-            reflections.getFieldsAnnotatedWith(BootsInject.class).forEach(field -> bootsInjectInitializer.check(field, plugin));
-            reflections.getTypesAnnotatedWith(BootsListener.class).forEach(clazz -> listenerInitializer.check(clazz, plugin));
-            reflections.getTypesAnnotatedWith(BootsCommand.class).forEach(clazz -> commandInitializer.check(clazz, plugin));
-            reflections.getMethodsAnnotatedWith(BootsInventory.class).forEach(method -> inventoryInitializer.check(method, plugin));
-            reflections.getMethodsAnnotatedWith(BootsScheduledTask.class).forEach(method -> scheduledTaskInitializer.check(method, plugin));
-            reflections.getMethodsAnnotatedWith(CraftingRecipe.class).forEach(method -> recipeInitializer.check(method, plugin));
-            reflections.getMethodsAnnotatedWith(BootsBossBar.class).forEach(method -> bossBarInitializer.check(method, plugin));
-            reflections.getMethodsAnnotatedWith(Advancement.class).forEach(method -> advancementInitializer.check(method, plugin));
-            reflections.getMethodsAnnotatedWith(OnRegister.class).forEach(method -> onRegisterInitializer.check(method, plugin));
+            // Register annotation processors
+            reflections.getTypesAnnotatedWith(BootsAnnotationProcessor.class).forEach(clazz -> annotationProcessorInitializer.check(clazz, plugin));
+            annotationProcessorInitializer.getRegistry().forEach((processor, plug) -> annotationProcessorInitializer.register(processor, plug));
+            annotationProcessorInitializer.getRegistry().clear();
+
+            annotationProcessors.stream()
+                    .sorted(Comparator.comparing(RegisteredAnnotationProcessor::getPriority))
+                    .forEach(annotationProcessor -> {
+                        ElementType[] elementTypes = ((Target) annotationProcessor.getAnnotation().getAnnotation(Target.class)).value();
+                        for (ElementType type : elementTypes) {
+                            switch (type) {
+                                case TYPE:
+                                    processClass(reflections, annotationProcessor, plugin);
+                                    break;
+                                case FIELD:
+                                    processField(reflections, annotationProcessor, plugin);
+                                    break;
+                                case METHOD:
+                                    processMethod(reflections, annotationProcessor, plugin);
+                                    break;
+                                case PARAMETER:
+                                    break;
+                                case CONSTRUCTOR:
+                                    break;
+                                case LOCAL_VARIABLE:
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                    });
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             logger.severe("Error loading classes for plugin \'" + plugin.getName() + "\': " + e.getMessage());
         }
+    }
+
+    private static void processClass(Reflections reflections, RegisteredAnnotationProcessor annotationProcessor, Plugin plugin) {
+        if(!(annotationProcessor.getInitializer() instanceof ClassInitializer)) {
+            return;
+        }
+        reflections.getTypesAnnotatedWith(annotationProcessor.getAnnotation())
+                .forEach(clazz -> ((ClassInitializer)annotationProcessor.getInitializer()).check((Class<?>) clazz, plugin));
+    }
+
+    private static void processField(Reflections reflections, RegisteredAnnotationProcessor annotationProcessor, Plugin plugin) {
+        if(!(annotationProcessor.getInitializer() instanceof FieldInitializer)) {
+            return;
+        }
+        reflections.getFieldsAnnotatedWith(annotationProcessor.getAnnotation())
+                .forEach(field -> ((FieldInitializer)annotationProcessor.getInitializer()).check((Field) field, plugin));
+    }
+
+    private static void processMethod(Reflections reflections, RegisteredAnnotationProcessor annotationProcessor, Plugin plugin) {
+        if(!(annotationProcessor.getInitializer() instanceof MethodInitializer)) {
+            return;
+        }
+        reflections.getMethodsAnnotatedWith(annotationProcessor.getAnnotation())
+                .forEach(method -> ((MethodInitializer)annotationProcessor.getInitializer()).check((Method) method, plugin));
     }
 
 }

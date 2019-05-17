@@ -21,6 +21,7 @@ import net.sw4pspace.mc.boots.Boots;
 import net.sw4pspace.mc.boots.BootsManager;
 import net.sw4pspace.mc.boots.annotations.BootsScheduledTask;
 import net.sw4pspace.mc.boots.models.RegisteredScheduledTask;
+import net.sw4pspace.mc.boots.processor.BootsScheduledTaskProcessor;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 
@@ -28,6 +29,12 @@ import java.lang.reflect.MalformedParametersException;
 import java.lang.reflect.Method;
 
 public class ScheduledTaskInitializer implements MethodInitializer<RegisteredScheduledTask> {
+
+    private BootsScheduledTaskProcessor processor;
+
+    public ScheduledTaskInitializer(BootsScheduledTaskProcessor processor) {
+        this.processor = processor;
+    }
 
     @Override
     public void check(Method method, Plugin plugin) {
@@ -68,7 +75,7 @@ public class ScheduledTaskInitializer implements MethodInitializer<RegisteredSch
         Runnable task = clazz.equals(plugin.getClass()) ?
                 () -> invokeMainClassMethod(plugin, method) :
                 () -> invokeMethod(clazz, method);
-        BootsManager.getRegisteredScheduledTasks().put(new RegisteredScheduledTask(bootsScheduledTask, task), plugin);
+        processor.getRegistry().put(new RegisteredScheduledTask(bootsScheduledTask, task), plugin);
     }
 
 }

@@ -20,11 +20,18 @@ import net.sw4pspace.mc.boots.Boots;
 import net.sw4pspace.mc.boots.BootsManager;
 import net.sw4pspace.mc.boots.annotations.Advancement;
 import net.sw4pspace.mc.boots.models.RegisteredAdvancement;
+import net.sw4pspace.mc.boots.processor.AdvancementProcessor;
 import org.bukkit.plugin.Plugin;
 
 import java.lang.reflect.Method;
 
 public class AdvancementInitializer implements MethodInitializer<RegisteredAdvancement> {
+
+    private AdvancementProcessor processor;
+
+    public AdvancementInitializer(AdvancementProcessor processor) {
+        this.processor = processor;
+    }
 
     @Override
     public void check(Method method, Plugin plugin) {
@@ -46,7 +53,7 @@ public class AdvancementInitializer implements MethodInitializer<RegisteredAdvan
         org.bukkit.advancement.Advancement advancement = (org.bukkit.advancement.Advancement) (clazz.equals(plugin.getClass()) ?
                 invokeMainClassMethod(plugin, method) :
                 invokeMethod(clazz, method));
-        BootsManager.getRegisteredAdvancements().put(new RegisteredAdvancement(method, clazz, advancement), plugin);
+        processor.getRegistry().put(new RegisteredAdvancement(method, clazz, advancement), plugin);
     }
 
 }

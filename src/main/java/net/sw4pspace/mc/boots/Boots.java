@@ -27,6 +27,7 @@ import net.sw4pspace.mc.boots.registries.InventoryRegistry;
 import net.sw4pspace.mc.boots.models.RegionSelection;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.plugin.Plugin;
 
 import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -44,6 +45,7 @@ import java.util.logging.Logger;
 public class Boots {
 
     @Getter private static Logger bootsLogger = Bukkit.getPluginManager().getPlugin("Boots").getLogger();
+    @Getter private static Plugin bootsPlugin = Bukkit.getPluginManager().getPlugin("Boots");
 
     @Getter private static Piston piston;
 
