@@ -1,0 +1,6 @@
+name: Boots-Quartz
+description: Quartz Scheduling integratin for the Boots Framework
+version: 1.0.0
+main: net.sw4pspace.mc.boots.quartz.QuartzConfig
+api-version: 1.14
+depend: ["Boots"]

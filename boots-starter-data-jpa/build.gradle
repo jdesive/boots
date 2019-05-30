@@ -1,0 +1,8 @@
+plugins {
+    id 'java'
+}
+
+dependencies {
+    implementation project('::boots-starter')
+    implementation "org.hibernate:'hibernate-core:${hibernateVersion}"
+}

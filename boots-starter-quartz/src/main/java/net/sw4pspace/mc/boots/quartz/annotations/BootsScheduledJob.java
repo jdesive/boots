@@ -14,24 +14,14 @@
  * copies or substantial portions of the Software.
  */
 
-plugins {
-    id 'idea'
-    id 'java'
-}
+package net.sw4pspace.mc.boots.quartz.annotations;
 
-group = bootsGroup
-version = bootsVersion
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-allprojects {
-    repositories {
-        mavenCentral()
-        maven { url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
-        maven { url = 'https://oss.sonatype.org/content/repositories/snapshots' }
-    }
-}
-
-subprojects {
-    version = bootsVersion
-    group = bootsGroup
-    sourceCompatibility = '1.8' // TODO upgrade to 1.11
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface BootsScheduledJob {
 }

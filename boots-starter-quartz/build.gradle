@@ -1,0 +1,63 @@
+plugins {
+    id 'com.github.johnrengelman.shadow' version '5.0.0'
+    id "java"
+    id 'maven'
+}
+
+configurations {
+    deployerJars
+}
+
+group 'net.sw4pspace.mc'
+version '0.0.1-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project('::boots-starter')
+    implementation "org.quartz-scheduler:quartz:${quartzVersion}"
+    implementation "org.spigotmc:spigot-api:${spigotApiVerison}"
+
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+}
+
+configurations {
+    jar.archiveName = bootsQuartzName + '-no-deps-' + bootsVersion + '.jar'
+}
+
+shadowJar {
+    baseName = bootsQuartzName
+    classifier = null
+    dependencies {
+        include(dependency('org.quartz-scheduler:quartz:.*'))
+        include(dependency('org.slf4j:.*'))
+    }
+}
+
+uploadArchives {
+    repositories.mavenDeployer {
+        repository(url: 'https://nexus.sw4pspace.net/nexus/content/repositories/releases/') {
+            authentication(userName: "$System.env.NEXUS_USER", password: "$System.env.NEXUS_PASS")
+        }
+        snapshotRepository(url: 'https://nexus.sw4pspace.net/nexus/content/repositories/snapshots/') {
+            authentication(userName: "$System.env.NEXUS_USER", password: "$System.env.NEXUS_PASS")
+        }
+        pom.version = bootsVersion
+        pom.artifactId = bootsQuartzName
+        pom.groupId = bootsGroup
+        pom.project {
+            licenses {
+                license {
+                    name 'MIT License'
+                    url 'https://en.wikipedia.org/wiki/MIT_License'
+                    distribution 'repo'
+                }
+            }
+        }
+    }
+}

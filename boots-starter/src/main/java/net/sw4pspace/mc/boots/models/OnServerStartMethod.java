@@ -14,24 +14,19 @@
  * copies or substantial portions of the Software.
  */
 
-plugins {
-    id 'idea'
-    id 'java'
-}
+package net.sw4pspace.mc.boots.models;
 
-group = bootsGroup
-version = bootsVersion
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
-allprojects {
-    repositories {
-        mavenCentral()
-        maven { url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
-        maven { url = 'https://oss.sonatype.org/content/repositories/snapshots' }
-    }
-}
+import java.lang.reflect.Method;
 
-subprojects {
-    version = bootsVersion
-    group = bootsGroup
-    sourceCompatibility = '1.8' // TODO upgrade to 1.11
+@Getter
+@Setter
+@AllArgsConstructor
+public class OnServerStartMethod {
+    private Class<?> clazz;
+    private Method method;
+    private Runnable task;
 }

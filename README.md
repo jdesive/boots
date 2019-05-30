@@ -66,7 +66,7 @@ dependencies {
 }
 ```
 
-###plugin.yml
+### plugin.yml
 ```yaml
 name: <plugin name>
 description: <plugin description>

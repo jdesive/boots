@@ -14,24 +14,24 @@
  * copies or substantial portions of the Software.
  */
 
-plugins {
-    id 'idea'
-    id 'java'
-}
+package net.sw4pspace.mc.boots.quartz;
 
-group = bootsGroup
-version = bootsVersion
+import org.quartz.Job;
+import org.quartz.JobKey;
+import org.quartz.Trigger;
 
-allprojects {
-    repositories {
-        mavenCentral()
-        maven { url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
-        maven { url = 'https://oss.sonatype.org/content/repositories/snapshots' }
+public interface BootsJob extends Job {
+
+    Trigger getSchedule();
+
+    JobKey getJobKey();
+
+    default String getDescription() {
+        return "A Boots-Quartz scheduled job";
     }
-}
 
-subprojects {
-    version = bootsVersion
-    group = bootsGroup
-    sourceCompatibility = '1.8' // TODO upgrade to 1.11
+    default boolean isDurable() {
+        return false;
+    }
+
 }
