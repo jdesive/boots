@@ -17,15 +17,11 @@
 package net.sw4pspace.mc.boots.processor;
 
 import com.google.common.collect.Maps;
-import net.sw4pspace.mc.boots.AnnotationProcessor;
 import net.sw4pspace.mc.boots.Boots;
 import net.sw4pspace.mc.boots.annotations.BootsAnnotationProcessor;
-import net.sw4pspace.mc.boots.annotations.OnRegister;
 import net.sw4pspace.mc.boots.annotations.OnServerStart;
 import net.sw4pspace.mc.boots.init.Initializer;
-import net.sw4pspace.mc.boots.init.OnRegisterInitializer;
 import net.sw4pspace.mc.boots.init.OnServerStartInitializer;
-import net.sw4pspace.mc.boots.models.OnRegisterMethod;
 import net.sw4pspace.mc.boots.models.OnServerStartMethod;
 import org.bukkit.plugin.Plugin;
 

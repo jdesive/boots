@@ -50,7 +50,7 @@ public class ScheduledJobInitializer implements ClassInitializer<RegisteredSched
                 .withDescription(bootsJob.getDescription())
                 .build();
         try {
-            Scheduler scheduler = (Scheduler) Boots.getPiston().get(Scheduler.class);
+            Scheduler scheduler = (Scheduler) Boots.getHopper().get(Scheduler.class);
             scheduler.scheduleJob(detail, trigger);
             Boots.getBootsLogger().info(getPluginName(plugin) + "Registered scheduled job [" + job.getClass().getName() + "]");
         } catch (IllegalAccessException | InstantiationException | SchedulerException e) {

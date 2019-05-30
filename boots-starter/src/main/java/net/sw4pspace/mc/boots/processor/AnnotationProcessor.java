@@ -14,7 +14,7 @@
  * copies or substantial portions of the Software.
  */
 
-package net.sw4pspace.mc.boots;
+package net.sw4pspace.mc.boots.processor;
 
 import net.sw4pspace.mc.boots.init.Initializer;
 import org.bukkit.plugin.Plugin;

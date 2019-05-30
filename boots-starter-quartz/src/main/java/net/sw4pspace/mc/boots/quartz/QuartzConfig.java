@@ -32,11 +32,11 @@ public class QuartzConfig extends JavaPlugin {
     private static Scheduler scheduler;
 
     static {
-        Boots.getPiston().registerToObject(SchedulerFactory.class, new StdSchedulerFactory());
+        Boots.getHopper().registerToObject(SchedulerFactory.class, new StdSchedulerFactory());
         try {
-            schedulerFactory = (SchedulerFactory) Boots.getPiston().get(SchedulerFactory.class);
-            Boots.getPiston().registerToObject(Scheduler.class, schedulerFactory.getScheduler());
-            scheduler = (Scheduler) Boots.getPiston().get(Scheduler.class);
+            schedulerFactory = (SchedulerFactory) Boots.getHopper().get(SchedulerFactory.class);
+            Boots.getHopper().registerToObject(Scheduler.class, schedulerFactory.getScheduler());
+            scheduler = (Scheduler) Boots.getHopper().get(Scheduler.class);
         } catch (IllegalAccessException | InstantiationException | SchedulerException e) {
             e.printStackTrace();
         }

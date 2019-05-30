@@ -17,16 +17,12 @@
 package net.sw4pspace.mc.boots.processor;
 
 import com.google.common.collect.Maps;
-import net.sw4pspace.mc.boots.AnnotationProcessor;
 import net.sw4pspace.mc.boots.Boots;
 import net.sw4pspace.mc.boots.annotations.BootsAnnotationProcessor;
-import net.sw4pspace.mc.boots.annotations.BootsScheduledTask;
 import net.sw4pspace.mc.boots.annotations.CraftingRecipe;
 import net.sw4pspace.mc.boots.init.Initializer;
 import net.sw4pspace.mc.boots.init.RecipeInitializer;
-import net.sw4pspace.mc.boots.init.ScheduledTaskInitializer;
 import net.sw4pspace.mc.boots.models.RegisteredRecipe;
-import net.sw4pspace.mc.boots.models.RegisteredScheduledTask;
 import org.bukkit.plugin.Plugin;
 
 import java.lang.annotation.Annotation;

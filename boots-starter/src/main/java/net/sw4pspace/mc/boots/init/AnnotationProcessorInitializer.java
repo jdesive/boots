@@ -18,7 +18,7 @@ package net.sw4pspace.mc.boots.init;
 
 import com.google.common.collect.Maps;
 import lombok.Getter;
-import net.sw4pspace.mc.boots.AnnotationProcessor;
+import net.sw4pspace.mc.boots.processor.AnnotationProcessor;
 import net.sw4pspace.mc.boots.Boots;
 import net.sw4pspace.mc.boots.BootsManager;
 import org.bukkit.plugin.Plugin;

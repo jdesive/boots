@@ -17,7 +17,6 @@
 package net.sw4pspace.mc.boots.init;
 
 import net.sw4pspace.mc.boots.Boots;
-import net.sw4pspace.mc.boots.BootsManager;
 import net.sw4pspace.mc.boots.annotations.ImplementedBy;
 import net.sw4pspace.mc.boots.exception.BootsRegistrationException;
 import net.sw4pspace.mc.boots.processor.ImplementedByProcessor;
@@ -45,7 +44,7 @@ public class ImplementedByClassInitializer implements ClassInitializer<Class<?>>
     @Override
     public void register(Class<?> clazz, Plugin plugin) {
         try {
-            Boots.getPiston().load(clazz);
+            Boots.getHopper().load(clazz);
             Boots.getBootsLogger().info(getPluginName(plugin) + "Loaded dependency [" + clazz.getName() + "]");
         } catch (IllegalAccessException | InstantiationException e) {
             Boots.getBootsLogger().info(getPluginName(plugin) + "Error loading dependency [" + clazz.getName() + "]: " + e.getMessage());
@@ -54,7 +53,7 @@ public class ImplementedByClassInitializer implements ClassInitializer<Class<?>>
 
     private void load(Class<?> clazz, Plugin plugin){
         ImplementedBy annotation = clazz.getAnnotation(ImplementedBy.class);
-        Boots.getPiston().register(clazz, annotation.value());
+        Boots.getHopper().register(clazz, annotation.value());
         processor.getRegistry().put(clazz, plugin);
         Boots.getBootsLogger().info(getPluginName(plugin) + "Registering interface [" + clazz.getName() + "] to " + annotation.value().getName());
     }

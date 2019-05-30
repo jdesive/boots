@@ -20,7 +20,7 @@ import com.google.common.collect.Maps;
 import net.sw4pspace.mc.boots.quartz.annotations.BootsScheduledJob;
 import net.sw4pspace.mc.boots.quartz.init.ScheduledJobInitializer;
 import net.sw4pspace.mc.boots.quartz.models.RegisteredScheduledJob;
-import net.sw4pspace.mc.boots.AnnotationProcessor;
+import net.sw4pspace.mc.boots.processor.AnnotationProcessor;
 import net.sw4pspace.mc.boots.Boots;
 import net.sw4pspace.mc.boots.annotations.BootsAnnotationProcessor;
 import net.sw4pspace.mc.boots.init.Initializer;

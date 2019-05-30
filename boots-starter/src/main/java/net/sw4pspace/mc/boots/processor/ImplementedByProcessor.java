@@ -17,7 +17,6 @@
 package net.sw4pspace.mc.boots.processor;
 
 import com.google.common.collect.Maps;
-import net.sw4pspace.mc.boots.AnnotationProcessor;
 import net.sw4pspace.mc.boots.Boots;
 import net.sw4pspace.mc.boots.annotations.BootsAnnotationProcessor;
 import net.sw4pspace.mc.boots.annotations.ImplementedBy;

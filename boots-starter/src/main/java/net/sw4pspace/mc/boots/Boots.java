@@ -21,7 +21,7 @@ import com.google.common.util.concurrent.AtomicDouble;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import lombok.Getter;
-import net.sw4pspace.mc.boots.di.Piston;
+import net.sw4pspace.mc.boots.di.Hopper;
 import net.sw4pspace.mc.boots.registries.BossBarRegistry;
 import net.sw4pspace.mc.boots.registries.InventoryRegistry;
 import net.sw4pspace.mc.boots.models.RegionSelection;
@@ -47,7 +47,7 @@ public class Boots {
     @Getter private static Logger bootsLogger = Bukkit.getPluginManager().getPlugin("Boots").getLogger();
     @Getter private static Plugin bootsPlugin = Bukkit.getPluginManager().getPlugin("Boots");
 
-    @Getter private static Piston piston;
+    @Getter private static Hopper hopper;
 
     // Managers
     @Getter private static InventoryRegistry inventoryRegistry;
@@ -65,7 +65,7 @@ public class Boots {
         inventoryRegistry = new InventoryRegistry();
         bossBarRegistry = new BossBarRegistry();
 
-        piston = new Piston();
+        hopper = new Hopper();
     }
 
     public static AtomicDouble getCurrentTps() {

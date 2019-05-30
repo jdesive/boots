@@ -17,8 +17,6 @@
 package net.sw4pspace.mc.boots.init;
 
 import net.sw4pspace.mc.boots.Boots;
-import net.sw4pspace.mc.boots.BootsManager;
-import net.sw4pspace.mc.boots.annotations.BootsInject;
 import net.sw4pspace.mc.boots.models.RegisteredDependency;
 import net.sw4pspace.mc.boots.processor.BootsInjectProcessor;
 import org.bukkit.plugin.Plugin;
@@ -43,7 +41,7 @@ public class BootsInjectInitializer implements FieldInitializer<RegisteredDepend
     public void register(RegisteredDependency dependency, Plugin plugin) {
         dependency.getField().setAccessible(true);
         try {
-            dependency.getField().set(dependency.getContainingClassInstance(), Boots.getPiston().get(dependency.getField().getType()));
+            dependency.getField().set(dependency.getContainingClassInstance(), Boots.getHopper().get(dependency.getField().getType()));
             Boots.getBootsLogger().info(getPluginName(plugin) + "Injected dependency [" + dependency.getField().getType() + "] to field [" + dependency.getField().getName() + "]");
         } catch (IllegalAccessException | InstantiationException e) {
             Boots.getBootsLogger().info(getPluginName(plugin) + "Error injecting dependency [" + dependency.getField().getType() + "] in field [" + dependency.getField().getName() + "] in class " + dependency.getClazz().getName() + ": " + e.getMessage());
