@@ -30,20 +30,23 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.reflections.Reflections;
-import org.reflections.scanners.FieldAnnotationsScanner;
-import org.reflections.scanners.MethodAnnotationsScanner;
-import org.reflections.scanners.SubTypesScanner;
-import org.reflections.scanners.TypeAnnotationsScanner;
+import org.reflections.scanners.*;
 import org.reflections.util.ClasspathHelper;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
 import java.util.*;
+import java.util.Scanner;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 /**
  * BootsManager
@@ -59,7 +62,6 @@ public class BootsManager {
     // Registered Items Maps
     private static List<Plugin> registeredPlugins = Lists.newArrayList();
     @Getter private static HashMap<String, Object> annotatedClasses = Maps.newHashMap();
-
 
     // Initializers
     private static AnnotationProcessorInitializer annotationProcessorInitializer = new AnnotationProcessorInitializer();
@@ -115,6 +117,11 @@ public class BootsManager {
     // Run/Register methods
 
     private static void registerBootsPlugin(Plugin plugin) {
+
+        // Save default config
+        if(plugin.getResource("config.yml") != null)
+            plugin.saveDefaultConfig();
+
         Class<?> clazz = plugin.getClass();
         if (clazz.isAnnotationPresent(BootsPlugin.class)) {
             if (clazz.isAnnotationPresent(EnableWhitelist.class)) {
@@ -157,12 +164,30 @@ public class BootsManager {
                     new SubTypesScanner(false),
                     new TypeAnnotationsScanner(),
                     new FieldAnnotationsScanner(),
-                    new MethodAnnotationsScanner());
+                    new MethodAnnotationsScanner(),
+                    new ResourcesScanner());
 
             // Register annotation processors
             reflections.getTypesAnnotatedWith(BootsAnnotationProcessor.class).forEach(clazz -> annotationProcessorInitializer.check(clazz, plugin));
             annotationProcessorInitializer.getRegistry().forEach((processor, plug) -> annotationProcessorInitializer.register(processor, plug));
             annotationProcessorInitializer.getRegistry().clear();
+
+            // Register Configuration files
+            reflections.getResources(Pattern.compile("boots-.*\\.yml")).forEach(str -> {
+                InputStream is = pluginClassLoader.getResourceAsStream(str);
+                if(is == null) {
+                    Boots.getBootsLogger().info(getPluginName(plugin) + "Unable to read config file [" + str + "] from plugin \'" + plugin.getName() + "\'");
+                }
+                Scanner s = new Scanner(is).useDelimiter("\\A");
+                String yaml = s.hasNext() ? s.next() : "";
+                String finalPath = str.replace("boots-", "");
+                File configFile = new File(plugin.getDataFolder(), finalPath);
+                try {
+                    Files.write(configFile.toPath(), yaml.getBytes());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
 
             annotationProcessors.stream()
                     .sorted(Comparator.comparing(RegisteredAnnotationProcessor::getPriority))

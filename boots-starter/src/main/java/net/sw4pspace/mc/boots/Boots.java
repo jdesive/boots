@@ -23,6 +23,7 @@ import com.google.gson.GsonBuilder;
 import lombok.Getter;
 import net.sw4pspace.mc.boots.di.Hopper;
 import net.sw4pspace.mc.boots.registries.BossBarRegistry;
+import net.sw4pspace.mc.boots.registries.ConfigFileRegistry;
 import net.sw4pspace.mc.boots.registries.InventoryRegistry;
 import net.sw4pspace.mc.boots.models.RegionSelection;
 import org.bukkit.Bukkit;
@@ -52,6 +53,7 @@ public class Boots {
     // Managers
     @Getter private static InventoryRegistry inventoryRegistry;
     @Getter private static BossBarRegistry bossBarRegistry;
+    @Getter private static ConfigFileRegistry configFileRegistry;
 
     // Sever Statistics
     private static AtomicDouble currentTps = new AtomicDouble(20.0D); // Lombok on this seems to throw errors, should probably make a issue over at lombok github
@@ -64,6 +66,7 @@ public class Boots {
     static {
         inventoryRegistry = new InventoryRegistry();
         bossBarRegistry = new BossBarRegistry();
+        configFileRegistry = new ConfigFileRegistry();
 
         hopper = new Hopper();
     }

@@ -14,11 +14,18 @@
  * copies or substantial portions of the Software.
  */
 
-plugins {
-    id 'java'
-}
+package net.sw4pspace.mc.boots.annotations;
 
-dependencies {
-    implementation project('::boots-starter')
-    implementation "org.hibernate:'hibernate-core:${hibernateVersion}"
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Target(ElementType.FIELD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface BootsValue {
+
+    String value() default "";
+    String config() default "config";
+
 }

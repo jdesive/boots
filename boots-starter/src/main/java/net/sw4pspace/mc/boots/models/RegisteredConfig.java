@@ -14,11 +14,21 @@
  * copies or substantial portions of the Software.
  */
 
-plugins {
-    id 'java'
-}
+package net.sw4pspace.mc.boots.models;
 
-dependencies {
-    implementation project('::boots-starter')
-    implementation "org.hibernate:'hibernate-core:${hibernateVersion}"
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import net.sw4pspace.mc.boots.annotations.BootsValue;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
+
+import java.lang.reflect.Field;
+
+@Setter
+@Getter
+@AllArgsConstructor
+public class RegisteredConfig {
+    private String name;
+    private YamlConfiguration configuration;
 }

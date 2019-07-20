@@ -18,9 +18,9 @@ package net.sw4pspace.mc.boots.di;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
-import lombok.Getter;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Hopper
@@ -107,6 +107,41 @@ public class Hopper {
             return  hopperScope.get(implClass);
         }
         return load(iface);
+    }
+
+    public boolean exists(Class iface) {
+        return hopperClassMap.containsKey(iface) || hopperClassMap.containsValue(iface);
+    }
+
+    public Object fetchInstance(Class iface) throws InstantiationException, IllegalAccessException {
+        if(exists(iface)) {
+            Class ifaceClass = fetchKeyByName(iface.getName());
+            if(ifaceClass != null) {
+                return get(ifaceClass);
+            } else if(hopperClassMap.containsValue(iface)){
+                return hopperClassMap.get(fetchClassMapValue(iface));
+            }
+        }
+        return null;
+    }
+
+    private Class fetchKeyByName(String name) {
+        return hopperClassMap
+                .keySet()
+                .stream()
+                .filter(aClass -> name.equals(aClass.getName()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private Class fetchClassMapValue(Class value) {
+        return hopperClassMap
+                .entrySet()
+                .stream()
+                .filter(entry -> value.getName().equals(entry.getValue().getName()))
+                .map(Map.Entry::getKey)
+                .findFirst()
+                .orElse(null);
     }
 
 }
