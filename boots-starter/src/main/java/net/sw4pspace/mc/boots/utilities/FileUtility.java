@@ -14,9 +14,21 @@
  * copies or substantial portions of the Software.
  */
 
-rootProject.name = bootsName
-include 'boots-starter-data-jpa'
-include 'boots-starter'
-include 'boots-starter-quartz'
-include 'boots-economy'
+package net.sw4pspace.mc.boots.utilities;
 
+import net.sw4pspace.mc.boots.annotations.ImplementedBy;
+import net.sw4pspace.mc.boots.utilities.impl.FileUtilityImpl;
+import org.bukkit.plugin.Plugin;
+
+import java.io.IOException;
+
+@ImplementedBy(FileUtilityImpl.class)
+public interface FileUtility {
+
+    void writeToPluginDirectory(Plugin plugin, String name, String content) throws IOException;
+
+    String readFromPluginDirectory(Plugin plugin, String name) throws IOException;
+
+    boolean existsInPluginDirectory(Plugin plugin, String name);
+
+}

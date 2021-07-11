@@ -1,0 +1,5 @@
+database:
+  type: File
+  url: database.yml
+settings:
+  startingBalance: 30.0

@@ -58,6 +58,6 @@ public class BootsValueProcessor implements AnnotationProcessor<RegisteredConfig
 
     @Override
     public int getPriority() {
-        return -2;
+        return 2;
     }
 }

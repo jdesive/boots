@@ -54,6 +54,6 @@ public class ImplementedByProcessor implements AnnotationProcessor<Class<?>> {
 
     @Override
     public int getPriority() {
-        return -1;
+        return 0;
     }
 }

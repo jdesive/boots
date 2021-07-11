@@ -55,6 +55,6 @@ public class BootsInjectProcessor implements AnnotationProcessor<RegisteredDepen
 
     @Override
     public int getPriority() {
-        return 0;
+        return 1;
     }
 }

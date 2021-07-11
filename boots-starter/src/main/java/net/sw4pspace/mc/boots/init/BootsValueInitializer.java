@@ -17,23 +17,12 @@
 package net.sw4pspace.mc.boots.init;
 
 import net.sw4pspace.mc.boots.Boots;
-import net.sw4pspace.mc.boots.BootsManager;
 import net.sw4pspace.mc.boots.annotations.BootsValue;
 import net.sw4pspace.mc.boots.models.RegisteredConfigValue;
-import net.sw4pspace.mc.boots.models.RegisteredDependency;
-import net.sw4pspace.mc.boots.processor.BootsInjectProcessor;
 import net.sw4pspace.mc.boots.processor.BootsValueProcessor;
-import net.sw4pspace.mc.boots.registries.ConfigFileRegistry;
-import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
-import org.yaml.snakeyaml.Yaml;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.lang.reflect.Field;
 
 public class BootsValueInitializer implements FieldInitializer<RegisteredConfigValue> {
@@ -46,18 +35,8 @@ public class BootsValueInitializer implements FieldInitializer<RegisteredConfigV
 
     @Override
     public void check(Field field, Plugin plugin) {
-        Object instance = null;
-        if(Boots.getHopper().exists(field.getDeclaringClass())) {
-            try {
-                instance = Boots.getHopper().fetchInstance(field.getDeclaringClass());
-            } catch (InstantiationException | IllegalAccessException e) {
-                Boots.getBootsLogger().info("Error fetching hopper class " + field.getDeclaringClass() + ": " + e.getMessage());
-            }
-        } else {
-            instance = field.getDeclaringClass().equals(plugin.getClass()) ? plugin : instanceFromName(field.getDeclaringClass().getName());
-        }
-
-        if(instance != null) {
+        Object instance = field.getDeclaringClass().equals(plugin.getClass()) ? plugin : instanceFromName(field.getDeclaringClass().getName());
+        if (instance != null) {
             BootsValue value = field.getAnnotation(BootsValue.class);
             processor.getRegistry().put(new RegisteredConfigValue(value, field.getDeclaringClass(), field, instance), plugin);
         }
@@ -69,9 +48,30 @@ public class BootsValueInitializer implements FieldInitializer<RegisteredConfigV
         try {
             registeredConfigValue.getField().setAccessible(true);
             YamlConfiguration configuration = Boots.getConfigFileRegistry().getConfig(registeredConfigValue.getBootsValue().config(), plugin);
-            if(configuration != null && configuration.contains(registeredConfigValue.getBootsValue().value())) {
-                registeredConfigValue.getField().set(registeredConfigValue.getContainingClassInstance(), configuration.get(registeredConfigValue.getBootsValue().value()));
-                Boots.getBootsLogger().info(getPluginName(plugin) + "Injected config value [" + registeredConfigValue.getBootsValue().value() + "] to field [" + registeredConfigValue.getField().getName() + "] to \'" + registeredConfigValue.getField().get(registeredConfigValue.getContainingClassInstance()) + "\'");
+            if (configuration != null && configuration.contains(registeredConfigValue.getBootsValue().value())) {
+                Object value = configuration.get(registeredConfigValue.getBootsValue().value());
+
+                if (Boots.getHopper().exists(registeredConfigValue.getField().getDeclaringClass())) {
+                    try {
+                        Object instance;
+                        instance = Boots.getHopper().load(Boots.getHopper().fetchClassMapValue(registeredConfigValue.getClazz()));
+
+                        if (instance != null) {
+                            Field field1 = instance.getClass().getField(registeredConfigValue.getField().getName());
+
+                            field1.set(instance, value);
+                            Boots.getBootsLogger().info(getPluginName(plugin) + "Injected config value [" + registeredConfigValue.getBootsValue().value() + "] to field [" + registeredConfigValue.getField().getName() + "] to class \'" + registeredConfigValue.getField().getDeclaringClass().toString() + "\'");
+                            return;
+                        }
+
+                    } catch (InstantiationException | NoSuchFieldException | IllegalAccessException e) {
+                        Boots.getBootsLogger().info(getPluginName(plugin) + "Error fetching hopper class " + registeredConfigValue.getField().getDeclaringClass() + ": " + e);
+                        e.printStackTrace();
+                        return;
+                    }
+                }
+                registeredConfigValue.getField().set(registeredConfigValue.getContainingClassInstance(), value);
+                Boots.getBootsLogger().info(getPluginName(plugin) + "Injected config value [" + registeredConfigValue.getBootsValue().value() + "] to field [" + registeredConfigValue.getField().getName() + "] to class \'" + registeredConfigValue.getField().getDeclaringClass().toString() + "\'");
             } else {
                 Boots.getBootsLogger().info(getPluginName(plugin) + "Could not inject config value in field [" + registeredConfigValue.getField().getName() + "], config not found");
             }

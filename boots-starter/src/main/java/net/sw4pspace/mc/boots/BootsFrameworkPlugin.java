@@ -46,7 +46,7 @@ public class BootsFrameworkPlugin extends JavaPlugin implements Listener {
 
     @Override
     public void onEnable() {
-        BootsManager.register(this);
+        BootsManager.scan(this);
         super.onEnable();
     }
 
@@ -58,7 +58,7 @@ public class BootsFrameworkPlugin extends JavaPlugin implements Listener {
     @EventHandler
     public void onPluginEnable(PluginEnableEvent event) {
         if (event.getPlugin().getDescription().getDepend().contains("Boots")) {
-            BootsManager.register(event.getPlugin());
+            BootsManager.scan(event.getPlugin());
         }
     }
 }

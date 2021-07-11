@@ -23,11 +23,17 @@ for Spigot/Bukkit plugins.**
 * @IdleTimeout
 * @SpawnRadius
 * @OnRegister
+* @BootsInject
+* [@BootsValue](/docs/BootsValue.md)
+* @ImplementedBy
+* @OnServerStart
 ### Utilities
 * Inventory Registry
 * Boss Bar Registry
 * TPS Monitor
 * Inventory Builder
+* File Utility
+* Region Selection 
 
 ## Project Setup
 ### Build Tool

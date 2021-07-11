@@ -18,6 +18,8 @@ package net.sw4pspace.mc.boots.di;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import net.sw4pspace.mc.boots.BootsManager;
+import org.bukkit.plugin.Plugin;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -84,6 +86,10 @@ public class Hopper {
         if(implClass == null)
             throw new NullPointerException("Cannot find impl class for interface [" + iface.getName() + "]");
 
+        if (hopperScope.containsKey(implClass)) {
+            return hopperScope.get(implClass);
+        }
+
         synchronized (hopperScope) {
             Object service = implClass.newInstance();
             hopperScope.put(implClass, service);
@@ -125,7 +131,7 @@ public class Hopper {
         return null;
     }
 
-    private Class fetchKeyByName(String name) {
+    public Class fetchKeyByName(String name) {
         return hopperClassMap
                 .keySet()
                 .stream()
@@ -134,7 +140,7 @@ public class Hopper {
                 .orElse(null);
     }
 
-    private Class fetchClassMapValue(Class value) {
+    public Class fetchClassMapValue(Class value) {
         return hopperClassMap
                 .entrySet()
                 .stream()

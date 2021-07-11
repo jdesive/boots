@@ -17,6 +17,7 @@
 package net.sw4pspace.mc.boots.quartz.processor;
 
 import com.google.common.collect.Maps;
+import net.sw4pspace.mc.boots.quartz.QuartzConfig;
 import net.sw4pspace.mc.boots.quartz.annotations.BootsScheduledJob;
 import net.sw4pspace.mc.boots.quartz.init.ScheduledJobInitializer;
 import net.sw4pspace.mc.boots.quartz.models.RegisteredScheduledJob;
@@ -26,9 +27,15 @@ import net.sw4pspace.mc.boots.annotations.BootsAnnotationProcessor;
 import net.sw4pspace.mc.boots.init.Initializer;
 import net.sw4pspace.mc.boots.processor.ProcessorPriority;
 import org.bukkit.plugin.Plugin;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.SchedulerFactory;
+import org.quartz.impl.StdSchedulerFactory;
 
 import java.lang.annotation.Annotation;
 import java.util.Map;
+
+import static org.bukkit.plugin.java.JavaPlugin.getPlugin;
 
 @BootsAnnotationProcessor
 public class BootsScheduledJobProcessor implements AnnotationProcessor<RegisteredScheduledJob> {

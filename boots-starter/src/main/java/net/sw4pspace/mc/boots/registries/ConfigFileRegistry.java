@@ -37,15 +37,22 @@ public class ConfigFileRegistry {
 
     public YamlConfiguration loadYAMLConfigFile(String name, Plugin plugin) {
         YamlConfiguration configuration = new YamlConfiguration();
+
+        name = name.replace(".yml", "");
+
         File configFile = new File(plugin.getDataFolder(), name + ".yml");
         if(!configFile.exists()) {
             Boots.getBootsLogger().info("Error, cannot find config file \'" + name + "\'");
         }
+
+        Boots.getBootsLogger().info("Loading config file [" + name + "] from plugin " + plugin.getName());
+
         try {
             configuration.load(configFile);
             synchronized (configFiles) {
                 configFiles.put(new RegisteredConfig(name, configuration), plugin);
             }
+            Boots.getBootsLogger().info("Successfully loaded config file [" + name + "] from plugin " + plugin.getName());
             return configuration;
         } catch (InvalidConfigurationException | IOException e) {
             e.printStackTrace();
@@ -55,8 +62,7 @@ public class ConfigFileRegistry {
 
     public Optional<YamlConfiguration> exists(String name, Plugin plugin) {
         return configFiles.entrySet().stream()
-                .filter(entry -> entry.getValue() == plugin)
-                .filter(entry -> entry.getKey().getName().equals(name))
+                .filter(entry -> entry.getKey().getName().equals(name) && entry.getValue().getName().equals(plugin.getName()))
                 .map(entry -> entry.getKey().getConfiguration())
                 .findFirst();
 
@@ -65,7 +71,6 @@ public class ConfigFileRegistry {
     public YamlConfiguration getConfig(String name, Plugin plugin) {
         return exists(name, plugin).orElseGet(() -> loadYAMLConfigFile(name, plugin));
     }
-
 
 
 }

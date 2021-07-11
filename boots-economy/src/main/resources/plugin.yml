@@ -1,0 +1,6 @@
+name: Boots-Economy
+description: A Server economy plugin built with boots
+version: 1.0.0
+main: net.sw4pspace.mc.boots.economy.EconomyPlugin
+api-version: 1.14
+depend: ["Boots"]

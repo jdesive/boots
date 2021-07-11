@@ -28,26 +28,22 @@ import org.quartz.impl.StdSchedulerFactory;
 @BootsPlugin
 public class QuartzConfig extends JavaPlugin {
 
-    private static SchedulerFactory schedulerFactory;
-    private static Scheduler scheduler;
-
     static {
         Boots.getHopper().registerToObject(SchedulerFactory.class, new StdSchedulerFactory());
         try {
-            schedulerFactory = (SchedulerFactory) Boots.getHopper().get(SchedulerFactory.class);
+            SchedulerFactory schedulerFactory = (SchedulerFactory) Boots.getHopper().get(SchedulerFactory.class);
             Boots.getHopper().registerToObject(Scheduler.class, schedulerFactory.getScheduler());
-            scheduler = (Scheduler) Boots.getHopper().get(Scheduler.class);
         } catch (IllegalAccessException | InstantiationException | SchedulerException e) {
             e.printStackTrace();
         }
     }
 
     @OnServerStart
-    public void onRegister() {
+    public void onServerStart() {
         try {
-            scheduler.start();
+            ((Scheduler) Boots.getHopper().get(Scheduler.class)).start();
             getLogger().info("Quartz scheduling started");
-        } catch (SchedulerException e) {
+        } catch (SchedulerException | IllegalAccessException | InstantiationException e) {
             e.printStackTrace();
         }
     }

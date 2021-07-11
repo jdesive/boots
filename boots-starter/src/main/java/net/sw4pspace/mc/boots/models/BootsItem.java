@@ -14,9 +14,14 @@
  * copies or substantial portions of the Software.
  */
 
-rootProject.name = bootsName
-include 'boots-starter-data-jpa'
-include 'boots-starter'
-include 'boots-starter-quartz'
-include 'boots-economy'
+package net.sw4pspace.mc.boots.models;
 
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
+
+public class BootsItem extends ItemStack {
+
+    public BootsItem(Material type, int amount) {
+        super(type, amount);
+    }
+}

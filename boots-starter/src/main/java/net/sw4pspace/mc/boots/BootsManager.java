@@ -20,13 +20,11 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.Getter;
 import net.sw4pspace.mc.boots.annotations.*;
-import net.sw4pspace.mc.boots.annotations.BootsAnnotationProcessor;
 import net.sw4pspace.mc.boots.exception.BootsInitializationException;
 import net.sw4pspace.mc.boots.init.*;
-import net.sw4pspace.mc.boots.models.*;
+import net.sw4pspace.mc.boots.models.RegisteredAnnotationProcessor;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
-import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.reflections.Reflections;
@@ -43,14 +41,14 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
-import java.util.*;
 import java.util.Scanner;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 /**
  * BootsManager
- *
+ * <p>
  * This class manages the registration of plugins to the boots framework.
  *
  * @author Sw4p
@@ -61,7 +59,8 @@ public class BootsManager {
 
     // Registered Items Maps
     private static List<Plugin> registeredPlugins = Lists.newArrayList();
-    @Getter private static HashMap<String, Object> annotatedClasses = Maps.newHashMap();
+    @Getter
+    private static HashMap<String, Object> annotatedClasses = Maps.newHashMap();
 
     // Initializers
     private static AnnotationProcessorInitializer annotationProcessorInitializer = new AnnotationProcessorInitializer();
@@ -81,7 +80,7 @@ public class BootsManager {
      * @param plugin The plugin to register
      * @throws BootsInitializationException If the plugin does not contain a @BootsPlugin annotation
      */
-    public static void register(Plugin plugin) {
+    public static void scan(Plugin plugin) {
         if (registeredPlugins.contains(plugin)) return;
         registerBootsPlugin(plugin);
         scanPluginClasses(plugin);
@@ -119,8 +118,10 @@ public class BootsManager {
     private static void registerBootsPlugin(Plugin plugin) {
 
         // Save default config
-        if(plugin.getResource("config.yml") != null)
+        if (plugin.getResource("config.yml") != null) {
             plugin.saveDefaultConfig();
+            Boots.getConfigFileRegistry().loadYAMLConfigFile("config", plugin);
+        }
 
         Class<?> clazz = plugin.getClass();
         if (clazz.isAnnotationPresent(BootsPlugin.class)) {
@@ -167,15 +168,10 @@ public class BootsManager {
                     new MethodAnnotationsScanner(),
                     new ResourcesScanner());
 
-            // Register annotation processors
-            reflections.getTypesAnnotatedWith(BootsAnnotationProcessor.class).forEach(clazz -> annotationProcessorInitializer.check(clazz, plugin));
-            annotationProcessorInitializer.getRegistry().forEach((processor, plug) -> annotationProcessorInitializer.register(processor, plug));
-            annotationProcessorInitializer.getRegistry().clear();
-
             // Register Configuration files
             reflections.getResources(Pattern.compile("boots-.*\\.yml")).forEach(str -> {
                 InputStream is = pluginClassLoader.getResourceAsStream(str);
-                if(is == null) {
+                if (is == null) {
                     Boots.getBootsLogger().info(getPluginName(plugin) + "Unable to read config file [" + str + "] from plugin \'" + plugin.getName() + "\'");
                 }
                 Scanner s = new Scanner(is).useDelimiter("\\A");
@@ -184,14 +180,21 @@ public class BootsManager {
                 File configFile = new File(plugin.getDataFolder(), finalPath);
                 try {
                     Files.write(configFile.toPath(), yaml.getBytes());
+                    Boots.getConfigFileRegistry().loadYAMLConfigFile(finalPath, plugin);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             });
 
+            // Register annotation processors
+            reflections.getTypesAnnotatedWith(BootsAnnotationProcessor.class).forEach(clazz -> annotationProcessorInitializer.check(clazz, plugin));
+            annotationProcessorInitializer.getRegistry().forEach((processor, plug) -> annotationProcessorInitializer.register(processor, plug));
+            annotationProcessorInitializer.getRegistry().clear();
+
             annotationProcessors.stream()
                     .sorted(Comparator.comparing(RegisteredAnnotationProcessor::getPriority))
                     .forEach(annotationProcessor -> {
+                        Boots.getBootsLogger().info("Running annotation processor [" + annotationProcessor.getAnnotation().getName() + "] with priority " + annotationProcessor.getPriority());
                         ElementType[] elementTypes = ((Target) annotationProcessor.getAnnotation().getAnnotation(Target.class)).value();
                         for (ElementType type : elementTypes) {
                             switch (type) {
@@ -221,27 +224,27 @@ public class BootsManager {
     }
 
     private static void processClass(Reflections reflections, RegisteredAnnotationProcessor annotationProcessor, Plugin plugin) {
-        if(!(annotationProcessor.getInitializer() instanceof ClassInitializer)) {
+        if (!(annotationProcessor.getInitializer() instanceof ClassInitializer)) {
             return;
         }
         reflections.getTypesAnnotatedWith(annotationProcessor.getAnnotation())
-                .forEach(clazz -> ((ClassInitializer)annotationProcessor.getInitializer()).check((Class<?>) clazz, plugin));
+                .forEach(clazz -> ((ClassInitializer) annotationProcessor.getInitializer()).check((Class<?>) clazz, plugin));
     }
 
     private static void processField(Reflections reflections, RegisteredAnnotationProcessor annotationProcessor, Plugin plugin) {
-        if(!(annotationProcessor.getInitializer() instanceof FieldInitializer)) {
+        if (!(annotationProcessor.getInitializer() instanceof FieldInitializer)) {
             return;
         }
         reflections.getFieldsAnnotatedWith(annotationProcessor.getAnnotation())
-                .forEach(field -> ((FieldInitializer)annotationProcessor.getInitializer()).check((Field) field, plugin));
+                .forEach(field -> ((FieldInitializer) annotationProcessor.getInitializer()).check((Field) field, plugin));
     }
 
     private static void processMethod(Reflections reflections, RegisteredAnnotationProcessor annotationProcessor, Plugin plugin) {
-        if(!(annotationProcessor.getInitializer() instanceof MethodInitializer)) {
+        if (!(annotationProcessor.getInitializer() instanceof MethodInitializer)) {
             return;
         }
         reflections.getMethodsAnnotatedWith(annotationProcessor.getAnnotation())
-                .forEach(method -> ((MethodInitializer)annotationProcessor.getInitializer()).check((Method) method, plugin));
+                .forEach(method -> ((MethodInitializer) annotationProcessor.getInitializer()).check((Method) method, plugin));
     }
 
 }
